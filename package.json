@@ -1,0 +1,41 @@
+{
+  "name": "aion2-companion",
+  "version": "1.0.0",
+  "description": "Aion 2 Companion - a desktop toolkit for stat planning, combat power breakdown, and other Aion2 utilities",
+  "main": "src/main.js",
+  "author": "StepTube",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^32.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "com.local.aion2companion",
+    "productName": "Aion 2 Companion",
+    "icon": "build/icon.png",
+    "files": [
+      "src/**/*"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "mac": {
+      "category": "public.app-category.utilities",
+      "target": "dmg"
+    },
+    "win": {
+      "target": ["nsis", "portable"]
+    },
+    "portable": {
+      "artifactName": "${productName}-portable-${version}.${ext}"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Utility"
+    }
+  }
+}

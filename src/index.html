@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aion 2 Companion</title>
+<style>
+  :root{
+    --bg:#0e0e16; --card:#191926; --card2:#1f1f30; --line:#2e2e44;
+    --txt:#ededf5; --muted:#9a9ab2; --red:#e63950; --gold:#e0b45c;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:var(--txt);min-height:100vh;padding:10px 16px 60px}
+  .wrap{max-width:1060px;margin:0 auto}
+  .grid{display:grid;grid-template-columns:1fr 1.35fr;gap:18px;margin-top:22px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px}
+  .card2{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:20px 22px}
+  h2{font-size:15px;font-weight:700;color:var(--gold);margin-bottom:14px}
+  h2.r{color:var(--red)}
+  .field{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:5px 0}
+  .field label{font-size:12.5px;color:var(--muted);flex:1;line-height:1.35}
+  .field input{width:110px;background:#12121c;border:1px solid var(--line);border-radius:8px;color:var(--txt);font-size:14px;font-weight:700;padding:7px 10px;text-align:right;font-family:inherit}
+  .field input:focus{outline:none;border-color:var(--red)}
+  .field select{width:130px;background:#12121c;border:1px solid var(--line);border-radius:8px;color:var(--txt);font-size:13px;font-weight:700;padding:7px 8px;font-family:inherit}
+  .field select:focus{outline:none;border-color:var(--red)}
+  .sect{margin-top:14px;padding-top:10px;border-top:1px dashed var(--line);font-size:11.5px;color:var(--muted);font-weight:700;letter-spacing:1px}
+  /* results */
+  .pockets{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+  .pk{background:#15151f;border:1px solid var(--line);border-radius:10px;padding:10px 12px;text-align:center}
+  .pk .n{font-size:11px;color:var(--muted)}
+  .pk .v{font-size:18px;font-weight:800;color:var(--gold);margin-top:3px}
+  .pk .m{font-size:11px;color:var(--red);font-weight:700;margin-top:2px}
+  .bar-row{display:flex;align-items:center;gap:12px;margin:9px 0}
+  .bar-name{width:170px;font-size:13px;text-align:right;flex-shrink:0;line-height:1.25}
+  .bar-track{flex:1;height:28px;background:#15151f;border-radius:6px;position:relative;overflow:hidden}
+  .bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:9px;font-size:12.5px;font-weight:700;min-width:2px;transition:width .25s}
+  .bar-val{position:absolute;top:0;height:100%;display:flex;align-items:center;font-size:12.5px;font-weight:700;color:var(--gold);padding-left:8px}
+  .divider{border-top:1px dashed var(--line);margin:12px 0}
+  .note{font-size:11px;color:var(--muted);line-height:1.6;margin-top:12px}
+  .mults{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+  .mtag{background:#15151f;border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:11.5px;color:var(--muted)}
+  .mtag b{color:var(--txt)}
+  .warn{color:var(--red);font-size:12px;margin-top:8px;display:none}
+  /* tabs */
+  .tabs{display:flex;gap:8px;margin-top:20px;border-bottom:1px solid var(--line)}
+  .tab-btn{background:none;border:none;color:var(--muted);font-family:inherit;font-size:14px;font-weight:700;padding:10px 4px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+  .tab-btn:hover{color:var(--txt)}
+  .tab-btn.active{color:var(--gold);border-bottom-color:var(--red)}
+  .tabpanel{display:none}
+  .tabpanel.active{display:block}
+  /* combat power tab */
+  .callout{background:#241a1e;border:1px solid #4a2530;border-radius:12px;padding:14px 16px;font-size:12px;color:var(--muted);line-height:1.7;margin-top:20px}
+  .callout b{color:var(--txt)}
+  .tier-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px dashed var(--line)}
+  .tier-row:last-child{border-bottom:none}
+  .tier-badge{flex-shrink:0;width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px}
+  .tier-S{background:#e6395033;color:#ff5f75;border:1px solid #e63950}
+  .tier-A{background:#e0b45c33;color:#e0b45c;border:1px solid #e0b45c}
+  .tier-B{background:#7a7a9633;color:#b9b9d0;border:1px solid #4a4a66}
+  .tier-C{background:#4a4a5c33;color:#8a8aa0;border:1px solid #3a3a4c}
+  .tier-name{font-weight:700;font-size:13.5px}
+  .tier-desc{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.5}
+  .arc-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:10px}
+  .arc-slot{background:#15151f;border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center}
+  .arc-slot .n{font-size:11px;color:var(--muted);margin-bottom:6px}
+  .arc-slot select{width:100%;background:#12121c;border:1px solid var(--line);border-radius:8px;color:var(--txt);font-size:12px;font-weight:700;padding:6px 4px;font-family:inherit;text-align:center}
+  .arcd-row{display:grid;grid-template-columns:1.1fr 1fr 1.3fr;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--line)}
+  .arcd-row:last-child{border-bottom:none}
+  .arcd-row .arcd-label{font-size:12px;font-weight:700;color:var(--muted)}
+  .arcd-row select{width:100%;background:#12121c;border:1px solid var(--line);border-radius:6px;color:var(--txt);font-size:12px;font-weight:700;padding:6px 6px;font-family:inherit}
+  .set-summary-row{display:flex;align-items:center;gap:10px;padding:6px 0}
+  .set-count-badge{flex-shrink:0;min-width:28px;height:24px;border-radius:6px;background:#15151f;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;color:var(--gold)}
+  .set-active{color:var(--red);font-weight:700}
+  .refs{font-size:10.5px;color:var(--muted);line-height:1.9;margin-top:10px}
+  .refs a{color:#8a8ac0;text-decoration:none}
+  .refs a:hover{text-decoration:underline}
+  table.attr{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+  table.attr th{text-align:left;color:var(--muted);font-weight:700;font-size:10.5px;letter-spacing:.5px;padding:4px 8px;border-bottom:1px solid var(--line)}
+  table.attr td{padding:6px 8px;border-bottom:1px dashed var(--line)}
+  table.attr td.num{text-align:right;font-weight:700;color:var(--gold)}
+  table.attr input{width:70px;background:#12121c;border:1px solid var(--line);border-radius:6px;color:var(--txt);font-size:12.5px;font-weight:700;padding:5px 8px;text-align:right;font-family:inherit}
+  /* other tab: subtabs */
+  .subtabs{display:flex;gap:6px;margin-top:18px;flex-wrap:wrap}
+  .subtab-btn{background:#15151f;border:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:12.5px;font-weight:700;padding:8px 14px;border-radius:999px;cursor:pointer}
+  .subtab-btn:hover{color:var(--txt)}
+  .subtab-btn.active{color:#0e0e16;background:var(--gold);border-color:var(--gold)}
+  .subtabpanel{display:none;margin-top:16px}
+  .subtabpanel.active{display:block}
+  .beta-badge{display:inline-block;background:var(--red);color:#fff;font-size:9px;font-weight:800;letter-spacing:.5px;padding:2px 6px;border-radius:999px;margin-left:6px;vertical-align:middle;position:relative;top:-1px}
+  /* checklist */
+  .chk-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
+  .chk-item:last-child{border-bottom:none}
+  .chk-item input[type=checkbox]{width:18px;height:18px;margin-top:1px;accent-color:var(--red);flex-shrink:0;cursor:pointer}
+  .chk-item.done .chk-name{color:var(--muted);text-decoration:line-through}
+  .chk-name{font-size:13px;font-weight:700}
+  .chk-desc{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.5}
+  .chk-reset{font-size:11px;color:var(--gold);margin-bottom:10px}
+  .progress-track{height:8px;background:#15151f;border-radius:4px;overflow:hidden;margin-top:8px}
+  .progress-fill{height:100%;background:var(--red);border-radius:4px;transition:width .25s}
+  /* boss timer */
+  .boss-row{display:grid;grid-template-columns:1.4fr .8fr 1fr 1fr auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)}
+  .boss-row:last-child{border-bottom:none}
+  .boss-row input{width:100%;background:#12121c;border:1px solid var(--line);border-radius:6px;color:var(--txt);font-size:12px;font-weight:700;padding:6px 8px;font-family:inherit}
+  .boss-row .bname{font-size:12.5px;font-weight:700}
+  .boss-countdown{font-size:12.5px;font-weight:800;color:var(--gold)}
+  .boss-countdown.ready{color:var(--red)}
+  .btn{background:var(--red);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-family:inherit;font-weight:700;font-size:12.5px;cursor:pointer}
+  .btn:hover{opacity:.9}
+  .btn.ghost{background:#15151f;border:1px solid var(--line);color:var(--muted)}
+  .btn.small{padding:5px 10px;font-size:11px}
+  .row-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px 8px}
+  .row-x:hover{color:var(--red)}
+  /* enhancement / crafting */
+  .stage-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:center;padding:6px 0}
+  .stage-row input{width:100%;background:#12121c;border:1px solid var(--line);border-radius:6px;color:var(--txt);font-size:12.5px;font-weight:700;padding:6px 8px;text-align:right;font-family:inherit}
+  .mat-row{display:grid;grid-template-columns:1.4fr 1fr 1fr auto;gap:8px;align-items:center;padding:6px 0}
+  .mat-row input{width:100%;background:#12121c;border:1px solid var(--line);border-radius:6px;color:var(--txt);font-size:12.5px;font-weight:700;padding:6px 8px;font-family:inherit}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="tabs" style="margin-top:0">
+    <button class="tab-btn active" data-tab="cp">Combat Power Breakdown</button>
+    <button class="tab-btn" data-tab="damage">Damage Efficiency</button>
+    <button class="tab-btn" data-tab="arcana">Arcana Deck Simulator</button>
+    <button class="tab-btn" data-tab="guides">Guides</button>
+    <button class="tab-btn" data-tab="other">Other <span class="beta-badge">BETA</span></button>
+  </div>
+
+  <div id="tab-damage" class="tabpanel">
+  <div class="grid">
+    <!-- inputs -->
+    <div class="card">
+      <h2>My Stats</h2>
+      <div class="sect" style="margin-top:0;border:none;padding-top:0">Attack Power</div>
+      <div class="field"><label>Attack Power (stat window, gear equipped)</label><input type="number" id="atk" value="0"></div>
+      <div class="field"><label>Attack Power (with all gear removed)<br><span style="font-size:10.5px">※ Needed to split out Gear Attack, which gets Weapon Damage Amp applied</span></label><input type="number" id="atkNaked" value="0"></div>
+      <div class="field"><label>Destruction (stat window value · 0.2% per point)</label><input type="number" id="destr" value="0"></div>
+      <div class="field"><label>Power (stat window value · 0.1% per point)</label><input type="number" id="power" value="0"></div>
+      <div class="field"><label>Gear Breakthrough slots (+5% per slot)</label><input type="number" id="brk" value="0" min="0" max="9"></div>
+      <div style="font-size:11.5px;color:var(--gold);padding:6px 0 2px" id="incView">Attack Increase Rate: Equipped 0.0% · Unequipped 0.0%</div>
+      <div class="sect">Amplification Stats</div>
+      <div class="field"><label>Damage Amplification %</label><input type="number" id="amp" value="0" step="0.1"></div>
+      <div class="field"><label>Weapon Damage Amplification %</label><input type="number" id="wdmg" value="0" step="0.1"></div>
+      <div class="field"><label>Critical Damage Amplification %</label><input type="number" id="cdmg" value="0" step="0.1"></div>
+      <div class="field"><label>Front/Back Damage Amplification %</label><input type="number" id="rear" value="0" step="0.1"></div>
+      <div class="field"><label>Smite %</label><input type="number" id="smite" value="0" step="0.1"></div>
+      <div class="field"><label>PVE Damage Amplification %</label><input type="number" id="pve" value="0" step="0.1"></div>
+      <div class="field"><label>Boss Damage Amplification %</label><input type="number" id="boss" value="0" step="0.1"></div>
+      <div class="sect">Combat Environment Assumptions</div>
+      <div class="field"><label>Critical Hit Rate % (80 hard cap)</label><input type="number" id="crate" value="0" step="1"></div>
+      <div class="field"><label>Front/Back Attack Success Rate %</label><input type="number" id="back" value="0" step="1"></div>
+      <div class="field"><label>Boss Smite Resistance %</label><input type="number" id="resist" value="0" step="1"></div>
+      <div class="field"><label>Party Smite Buff (does not stack · pick one)</label><select id="sbuff">
+        <option value="0" selected>None (Solo)</option>
+        <option value="5">Chanter Buff +5%</option>
+        <option value="12">Cleric Heal Buff +12%</option>
+      </select></div>
+      <div class="warn" id="warn"></div>
+    </div>
+
+    <!-- results -->
+    <div class="card2">
+      <h2 class="r">Results</h2>
+      <div class="pockets">
+        <div class="pk"><div class="n">Base Attack</div><div class="v" id="pBase">—</div><div class="m" id="pBaseM">—</div></div>
+        <div class="pk"><div class="n">Gear Attack</div><div class="v" id="pGear">—</div><div class="m" id="pGearM">—</div></div>
+        <div class="pk"><div class="n">Effective Attack</div><div class="v" id="pEff">—</div><div class="m">The value damage is calculated from</div></div>
+      </div>
+      <div class="mults" id="mults"></div>
+      <div id="bars"></div>
+      <div class="divider"></div>
+      <div id="flats"></div>
+      <div class="note">
+        ※ Efficiency = effective damage gained per 1%p ÷ the multiplier already stacked on that stat. The more a stat is already stacked, the less the same 1%p is felt.<br>
+        ※ Flat attack power gets different multipliers depending on which "pocket" it lands in — Manastones/Enchants (Gear Attack: Weapon Dmg Amp × Increase Rate), Pet Bonus Attack (Base Attack: Increase Rate only), Pet Max Attack (half the value counts as Gear Attack), PVE Attack (no multiplier at all).<br>
+        ※ Smite % is the stat-window value; after adding the party buff and subtracting boss resistance, the result is the actual proc rate applied.<br>
+        ※ Attack Increase Rate is auto-calculated from Destruction (0.2%/pt) · Power (0.1%/pt) · Gear Breakthrough (+5%/slot); the breakthrough portion is bound to the gear itself, so it's excluded from the rate when gear is removed.
+      </div>
+    </div>
+  </div>
+
+  <!-- option simulator -->
+  <div class="card" style="margin-top:18px">
+    <h2>Option Simulator <span style="color:var(--muted);font-weight:400;font-size:12px">— actual damage gain from a Manastone/Gear option combo</span></h2>
+    <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-end">
+      <div style="flex:1;min-width:420px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 18px">
+        <div class="field"><label>Attack Power (Manastone/Gear)</label><input type="number" id="sAtk" value="0" step="1"></div>
+        <div class="field"><label>Weapon Damage Amplification %</label><input type="number" id="sW" value="0" step="0.1"></div>
+        <div class="field"><label>Damage Amplification %</label><input type="number" id="sAmp" value="0" step="0.1"></div>
+        <div class="field"><label>Critical Damage Amplification %</label><input type="number" id="sCrit" value="0" step="0.1"></div>
+        <div class="field"><label>Front/Back Damage Amplification %</label><input type="number" id="sRear" value="0" step="0.1"></div>
+        <div class="field"><label>Smite %</label><input type="number" id="sSmite" value="0" step="0.1"></div>
+      </div>
+      <div class="card2" style="min-width:210px;padding:16px 24px;text-align:center;border-color:var(--red)">
+        <div class="label">Real Damage Gain from This Combo</div>
+        <div id="simOut" style="font-size:34px;font-weight:800;color:var(--red);margin-top:4px">—</div>
+        <div id="simDetail" style="font-size:11px;color:var(--muted);margin-top:4px"></div>
+      </div>
+    </div>
+    <div class="note" style="margin-top:8px">※ Based on the current state entered in "My Stats" above, this computes the exact total-damage change once the option is added (a full recalculation, not a marginal-efficiency approximation).</div>
+  </div>
+  </div>
+  <!-- /tab-damage -->
+
+  <div id="tab-cp" class="tabpanel active">
+    <div class="callout">
+      <b>⚠ Aion2 actually has two different "power" numbers, and neither has a public formula.</b> Your stat-window <b>Combat Power (전투력)</b> is computed server-side by NCsoft, mostly from gear item level/enhancement — and NCsoft has openly re-weighted it more than once (a 2026 patch raised the CP weight of Smite/Accuracy/Critical and lowered Penetration/Spirit's weight, and players reported their CP number dropping overnight as a result). Separately, the Korean community runs <b>아툴 (Atool, aion2tool.com)</b> — a from-scratch DPS-estimate score built from real skill-damage-share data, which parties actually use to judge a player's contribution, because two characters at the same Combat Power can put out very different real damage depending on their <b>Soul Engraving</b> rolls (random substats every piece of gear carries). Nothing below claims to reproduce either number exactly. It compiles what Korean (Inven, FM코리아, DC인사이드, the official AION2-NC boards) and Taiwanese/Chinese (Bilibili, 17173, TapTap) communities agree on for relative stat priority, plus every subsystem below that has fully confirmed, fixed numbers.
+    </div>
+
+    <div class="grid" style="margin-top:14px">
+      <div class="card">
+        <h2>Arcana Combat Power <span style="color:var(--muted);font-weight:400;font-size:12px">— quick 5-slot version</span></h2>
+        <div class="arc-grid" id="arcGrid"></div>
+        <div class="divider"></div>
+        <div class="pockets" style="grid-template-columns:1fr">
+          <div class="pk"><div class="n">Total Arcana Combat Power</div><div class="v" id="arcTotal" style="font-size:24px">0</div><div class="m" id="arcSetNote" style="color:var(--muted)">—</div></div>
+        </div>
+        <div class="note">
+          ※ Each equipped Arcana card grants a flat Combat Power bonus by grade, independent of its stat roll: Common +20 · Rare +40 · Legendary +60 · Unique +80 — this part is exact and confirmed.<br>
+          ※ This quick version assumes 5 slots, but the Arcana system has expanded at least once (a 6th "Scale" slot was added, and further additions are plausible) — for a slot count you can adjust yourself, plus set-bonus tracking across 7 known sets, use the <b>Arcana Deck Simulator</b> in the Other tab.
+        </div>
+      </div>
+
+      <div class="card2">
+        <h2 class="r">Stat Priority Tiers <span style="color:var(--muted);font-weight:400;font-size:12px">— official CP weight, current patch</span></h2>
+        <div id="tierList"></div>
+        <div class="divider"></div>
+        <div style="font-size:11.5px;color:var(--muted);font-weight:700;letter-spacing:.5px;margin-bottom:8px">REAL DPS PRIORITY (Atool / Taiwan community consensus)</div>
+        <div id="dpsList"></div>
+        <div class="note">
+          ※ These two lists disagree on purpose. Combat Power's own math currently overweights Smite/Accuracy/Critical and underweights Penetration; DPS priority is what actually moves your damage number and skill-share, per both Korean (아툴 stat guides) and Taiwanese (Bilibili/17173 tier breakdowns) sources.
+        </div>
+      </div>
+    </div>
+
+    <div class="grid" style="margin-top:18px">
+      <div class="card">
+        <h2>Independent Proc Stats <span style="color:var(--muted);font-weight:400;font-size:12px">— Smite, Perfect, Multi-Hit</span></h2>
+        <div class="tier-row"><div class="tier-badge tier-S">2×</div><div><div class="tier-name">Smite (강타 / 强击)</div><div class="tier-desc">Roughly doubles the hit's damage when it procs — the single biggest per-proc multiplier in the game, bigger than a Critical (~1.5×). Wisdom [Lumiel] pantheon points convert directly to Smite chance at +0.2%/point.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-B">~3%</div><div><div class="tier-name">Perfect (완벽 / 完美)</div><div class="tier-desc">Locks the hit's damage to your weapon's maximum attack roll instead of a random point in its range. Measured average DPS gain is small (~3%) since it only matters for the width of your weapon's attack range.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-A">94%</div><div><div class="tier-name">Multi-Hit (다단히트 / 多段打击)</div><div class="tier-desc">Base auto-attacks already proc a multi-hit roll ~94% of the time, cascading up to 4 extra hits (reported distribution ≈ 50% for 0 extra hits, 25% for 1, 12.5% for 2, and a combined ~12.5% for 3–4). Each extra hit that lands adds roughly +20% final damage — and unlike Power/Precision, this doesn't run into an overflow cap.</div></div></div>
+        <div class="note">※ These three roll independently per hit — they don't replace each other, they stack as separate chances on top of your base Critical roll.</div>
+      </div>
+
+      <div class="card2">
+        <h2 class="r">Accuracy & Hit Mechanics <span style="color:var(--muted);font-weight:400;font-size:12px">— confirmed numbers</span></h2>
+        <div class="field"><label>Accuracy stat (스탯창 명중)</label><input type="number" id="cpAcc" value="0" step="10"></div>
+        <div class="pockets" style="grid-template-columns:1fr;margin-top:10px">
+          <div class="pk"><div class="n">Estimated Hit Rate</div><div class="v" id="cpAccOut" style="font-size:22px">50%</div><div class="m" style="color:var(--muted)">floor 50% · ~+10% per 100 pts</div></div>
+        </div>
+        <div class="note">
+          ※ Missing a hit triggers Parry, which halves your final damage on that hit — clearing the Parry threshold is a bigger deal than the raw Combat Power the Accuracy stat gives.<br>
+          ※ A patch standardized every class's Accuracy conversion rate to 1.2% (previously classes had different rates), and reports place "effectively always hits" around 1,100 Accuracy stat.<br>
+          ※ Critical Damage is also less valuable in PvP than PvE: PvP uses a 1.25× base multiplier instead of PvE's 1.5×, and your Critical Damage stat is only ~15% as effective (×0.15) against players as it is against monsters.
+        </div>
+      </div>
+    </div>
+
+    <div class="grid" style="margin-top:18px">
+      <div class="card">
+        <h2>Soul Engraving Priority <span style="color:var(--muted);font-weight:400;font-size:12px">— 영혼각인 / 灵魂刻印, by gear slot</span></h2>
+        <div class="tier-row"><div class="tier-badge tier-S">1</div><div><div class="tier-name">Weapon & Guarder</div><div class="tier-desc">Highest deal contribution by far — Weapon Damage Amp and Attack Speed are treated as non-negotiable "must-roll" options here.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-A">2</div><div><div class="tier-name">Gloves, Shoulders, Chest</div><div class="tier-desc">Common-consensus ("국룰") fixed picks: Attack Speed on Gloves, Damage Amp on Chest, Critical Damage Amp on Shoulders.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-B">3</div><div><div class="tier-name">Shoes</div><div class="tier-desc">Next priority after weapon/armor slots are locked in.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-C">4</div><div><div class="tier-name">Remaining Slots & Accessories</div><div class="tier-desc">Accessory picks commonly recommended: Attack Power +5.6%, Critical +5.6%, Flight +4%. PvE gear favors Attack Power/Critical/under-leveled active skills; PvP gear favors status resistance, Evasion, Agility, Accuracy, and under-leveled skills instead.</div></div></div>
+        <div class="note">※ Soul Engraving is a random roll on every piece of gear, independent of the item's main stats. Multiple guides put its breakpoint around 2,500 Combat Power — past that, a well-rolled lower-CP character can out-damage a higher-CP one with poor rolls.</div>
+      </div>
+
+      <div class="card2">
+        <h2 class="r">Pet Understanding Priority <span style="color:var(--muted);font-weight:400;font-size:12px">— 펫 이해도, by race</span></h2>
+        <div class="note" style="margin-top:0">※ Understanding slots 3 and 9 roll Damage Amp / Smite-type options and matter most for Combat Power — work these first regardless of race.</div>
+        <table class="attr">
+          <tr><th>Pet Race</th><th>Grants</th><th>Work Order</th></tr>
+          <tr><td>Intelligence (지성)</td><td>HP, Critical, Power, Knowledge, Intelligence-race Dmg Amp</td><td class="num">1st</td></tr>
+          <tr><td>Nature (자연)</td><td>Accuracy</td><td class="num">2nd</td></tr>
+          <tr><td>Wild (야성)</td><td>Mount ground speed, Bonus Accuracy, Agility, Knowledge, Wild-race Dmg Amp</td><td class="num">3rd</td></tr>
+          <tr><td>Transformation (변형)</td><td>Bonus Evasion, HP</td><td class="num">4th</td></tr>
+        </table>
+        <div class="note">※ Pet Understanding levels 1→5 need a cumulative 10/50/150/300/500 souls (1,010 total). Race Understanding goes up to level 10 and rises whenever you level any pet of that race.</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <h2>Attribute → Derived Stat Planner <span style="color:var(--muted);font-weight:400;font-size:12px">— exact, confirmed conversion rates</span></h2>
+      <table class="attr">
+        <tr><th>Core Attribute (+0.10%/pt)</th><th>Feeds Into</th><th>Points</th><th>Bonus</th></tr>
+        <tr><td>Might</td><td>Attack Power</td><td><input type="number" id="atMight" value="0" min="0"></td><td class="num" id="atMightOut">+0.00%</td></tr>
+        <tr><td>Constitution</td><td>Max HP</td><td><input type="number" id="atCon" value="0" min="0"></td><td class="num" id="atConOut">+0.00%</td></tr>
+        <tr><td>Dexterity</td><td>Evasion / Block / Crit Resist</td><td><input type="number" id="atDex" value="0" min="0"></td><td class="num" id="atDexOut">+0.00%</td></tr>
+        <tr><td>Precision</td><td>Accuracy / Critical</td><td><input type="number" id="atPre" value="0" min="0"></td><td class="num" id="atPreOut">+0.00%</td></tr>
+        <tr><td>Intelligence</td><td style="color:var(--muted)">(mapping not confirmed by sources)</td><td><input type="number" id="atInt" value="0" min="0"></td><td class="num" id="atIntOut">+0.00%</td></tr>
+        <tr><td>Willpower</td><td style="color:var(--muted)">(mapping not confirmed by sources)</td><td><input type="number" id="atWill" value="0" min="0"></td><td class="num" id="atWillOut">+0.00%</td></tr>
+        <tr><th style="padding-top:14px">Pantheon / Deity Stat (+0.20%/pt)</th><th style="padding-top:14px"></th><th style="padding-top:14px"></th><th style="padding-top:14px"></th></tr>
+        <tr><td>Justice (Nezekan)</td><td>Defense, Perfect proc rate</td><td><input type="number" id="atJustice" value="0" min="0"></td><td class="num" id="atJusticeOut">+0.00%</td></tr>
+        <tr><td>Freedom (Vaizel)</td><td>Accuracy, Evasion</td><td><input type="number" id="atFreedom" value="0" min="0"></td><td class="num" id="atFreedomOut">+0.00%</td></tr>
+        <tr><td>Illusion (Kaisinel)</td><td>Cooldown Reduction, Penetration</td><td><input type="number" id="atIllusion" value="0" min="0"></td><td class="num" id="atIllusionOut">+0.00%</td></tr>
+        <tr><td>Life (Yustiel)</td><td>Max HP, Regeneration proc rate</td><td><input type="number" id="atLife" value="0" min="0"></td><td class="num" id="atLifeOut">+0.00%</td></tr>
+        <tr><td>Time (Siel)</td><td>Attack Speed, Smite Resistance</td><td><input type="number" id="atTime" value="0" min="0"></td><td class="num" id="atTimeOut">+0.00%</td></tr>
+        <tr><td>Wisdom (Lumiel)</td><td>Smite proc rate</td><td><input type="number" id="atWisdom" value="0" min="0"></td><td class="num" id="atWisdomOut">+0.00%</td></tr>
+        <tr><td>Death <span style="color:var(--muted)">(name uncertain)</span></td><td style="color:var(--muted)">Critical (2nd stat unclear in sources)</td><td><input type="number" id="atDeath" value="0" min="0"></td><td class="num" id="atDeathOut">+0.00%</td></tr>
+        <tr><td>Destruction <span style="color:var(--muted)">(name uncertain)</span></td><td style="color:var(--muted)">Attack Power, Perfect Resistance</td><td><input type="number" id="atDestruction" value="0" min="0"></td><td class="num" id="atDestructionOut">+0.00%</td></tr>
+        <tr><td>Other 2 deity stats</td><td style="color:var(--muted)">(names/mappings not confirmed — same +0.20%/pt rate)</td><td><input type="number" id="atOtherDeity" value="0" min="0"></td><td class="num" id="atOtherDeityOut">+0.00%</td></tr>
+      </table>
+      <div class="note">
+        ※ Deity stats convert at double the rate of core attributes (0.20% vs 0.10% per point), so for raw derived-stat %, a deity point is worth 2× a core attribute point. 8 of the 10 Pantheon deity stats turned up with a stat mapping in research (2 with lower confidence, noted above); the remaining 2 are placeholders for whichever deity stats you're actually investing in.<br>
+        ※ Current community meta treats Time (Attack Speed) and Illusion (Cooldown Reduction) as the highest-priority Pantheon stats to invest in.<br>
+        ※ This table only converts attribute points into their derived-stat percentage — it does not attempt to output a single Combat Power number, since we have no confirmed formula linking derived-stat % to CP.
+      </div>
+    </div>
+
+    <div class="grid" style="margin-top:18px">
+      <div class="card">
+        <h2>Itemization Pipeline <span style="color:var(--muted);font-weight:400;font-size:12px">— 5 systems that build your gear</span></h2>
+        <div class="tier-row"><div class="tier-badge tier-B">1</div><div><div class="tier-name">Base Enhancement (기본강화)</div><div class="tier-desc">Standard gear upgrade currency/materials — the floor everyone does first.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-B">2</div><div><div class="tier-name">Breakthrough (돌파강화)</div><div class="tier-desc">Each breakthrough on a piece is worth +5% to your Attack Increase Rate (see Damage Efficiency tab) — but it's bound to the gear, so it's lost if that piece is removed/replaced.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-A">3</div><div><div class="tier-name">Manastone / Spiritstone Engraving (마석·영석 각인)</div><div class="tier-desc">Socketed stat gems — flat Attack Power, Damage Amp %, etc. Casual-friendly baseline: push Weapon/Sub-weapon to +15 breakthrough / 2-star first.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-C">4</div><div><div class="tier-name">Godstone Engraving (신석각인)</div><div class="tier-desc">On-hit proc effects (stun, seal/silence-lock, paralyze, silence) at varying proc rate/duration by grade — crowd-control utility, not a raw damage stat, and doesn't stack with itself.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-S">5</div><div><div class="tier-name">Soul Engraving (영혼각인)</div><div class="tier-desc">A random bonus substat every piece of gear carries regardless of its main stats — see the dedicated card above. The single biggest swing factor in real performance past ~2,500 CP.</div></div></div>
+      </div>
+
+      <div class="card2">
+        <h2 class="r">Titles <span style="color:var(--muted);font-weight:400;font-size:12px">— 칭호, grade & family</span></h2>
+        <div class="note" style="margin-top:0">Titles come in 4 grades — Common, Rare, Transcendent, and Unique — across 3 families: Attack, Defense, and Other. Each grade step adds another stat line, and Unique-grade equip effects are reported as dramatically stronger than the grades below it, making an early Unique title one of the fastest low-cost power spikes available.</div>
+        <table class="attr">
+          <tr><th>Grade</th><th>Stat Lines</th><th>Relative Power</th></tr>
+          <tr><td>Common (일반)</td><td>1</td><td class="num">Baseline</td></tr>
+          <tr><td>Rare (희귀)</td><td>2</td><td class="num">+</td></tr>
+          <tr><td>Transcendent (전승)</td><td>3</td><td class="num">++</td></tr>
+          <tr><td>Unique (유일)</td><td>4</td><td class="num">+++ (large jump)</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="refs">
+      Sources used for this tab (community-maintained and official patch notes, not an official formula) — open in your browser:<br>
+      • AION2-NC — official Korean patch notes &amp; Q&amp;A/Know-how boards (aion2.plaync.com)<br>
+      • Aion2 Inven — community tips, know-how, and class boards (inven.co.kr/board/aion2)<br>
+      • FM코리아 &amp; DC인사이드 아이온2 마이너 갤러리 — Combat Power, damage formula, and multi-hit mechanics threads (fmkorea.com, gall.dcinside.com/mgallery/board/aion2)<br>
+      • 게임톡, 게임뷰, 게임플, 플레이포럼 — Korean gaming press guides on Soul Engraving, titles, and Combat Power breakpoints (gametoc.co.kr, gamevu.co.kr, gameple.co.kr, playforum.net)<br>
+      • 아툴 (Atool) — community DPS-estimate ranking/scoring site (aion2tool.com)<br>
+      • 아자스 — character search, ranking &amp; Combat Power simulator (azas2.com)<br>
+      • Vortex Gaming — Combat Power system &amp; Perfect-vs-Smite damage analysis (vortexgaming.io)<br>
+      • 17173.com &amp; Bilibili — Taiwanese/Chinese-server damage substat breakdowns and stat priority tier lists (news.17173.com, bilibili.com)<br>
+      • AION2 Hub — Stat Calculator &amp; Build Calculator FAQ (aion2hub.com)
+    </div>
+  </div>
+  <!-- /tab-cp -->
+
+  <div id="tab-arcana" class="tabpanel">
+    <div class="callout" style="margin-top:0">
+      <b>⚠ Slot count is a moving target.</b> Aion2 has expanded the Arcana system more than once — sources describe 5 slots, then 6 after a "Scale (천칭)" piece was added, and you may be seeing more than that on your current client. Rather than hardcode a number we can't pin down with confidence, set it below to match what you actually see in-game. Set-effect numbers below are the best we could source, but several conflicted between guides (likely different patches) — treat them as directional, not exact.
+    </div>
+    <div class="grid" style="margin-top:14px">
+      <div class="card">
+        <h2>Your Deck <span style="color:var(--muted);font-weight:400;font-size:12px">— grade + set per slot</span></h2>
+        <div class="field"><label>Number of Arcana slots</label><input type="number" id="arcSlotCount" value="6" min="1" max="12"></div>
+        <div id="arcDeckRows" style="margin-top:10px"></div>
+      </div>
+      <div class="card2">
+        <h2 class="r">Deck Summary</h2>
+        <div class="pockets" style="grid-template-columns:1fr">
+          <div class="pk"><div class="n">Total Arcana Combat Power</div><div class="v" id="arcDeckCP" style="font-size:24px">0</div><div class="m" style="color:var(--muted)" id="arcDeckFilled">0 slots filled</div></div>
+        </div>
+        <div class="divider"></div>
+        <div id="arcSetBonuses"></div>
+        <div class="note">※ Combat Power per grade is exact and confirmed (Common +20 · Rare +40 · Legendary +60 · Unique +80). Set-bonus text below activates once a set reaches 2 and 4 pieces in your deck — see the reference card for what each one reportedly does.</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:18px">
+      <h2>Set Effects Reference <span style="color:var(--muted);font-weight:400;font-size:12px">— as reported by Korean guides, confidence varies</span></h2>
+      <div id="arcSetRef"></div>
+    </div>
+  </div>
+  <!-- /tab-arcana -->
+
+  <div id="tab-guides" class="tabpanel">
+    <div class="callout" style="margin-top:0">
+      Compiled and translated from Korean dungeon guides (게임톡, Inven, NC Purple Lounge) and namu.wiki. Coverage is limited to the dungeons that turned up detailed, sourced mechanic write-ups — it's not a complete list of every dungeon in the game, and mechanic details can change with balance patches.
+    </div>
+    <div class="subtabs">
+      <button class="subtab-btn active" data-subtab="dungeons">Dungeon Mechanics</button>
+      <button class="subtab-btn" data-subtab="glossary">Term Glossary</button>
+    </div>
+
+    <!-- Dungeon Mechanics -->
+    <div id="sub-dungeons" class="subtabpanel active">
+      <div class="card">
+        <h2>Transcendence (초월) Dungeons <span style="color:var(--muted);font-weight:400;font-size:12px">— 10-stage endgame content, difficulty scales per stage</span></h2>
+        <div class="tier-row"><div class="tier-badge tier-S">01</div><div><div class="tier-name">Shattered Arcanis — Boss: Talisra</div><div class="tier-desc">Wipe-mechanic phases trigger at ~60% and ~30% HP. Blue and purple orbs spawn at the map edges and drift toward the boss; assign 2 players to each color <i>before</i> the pull. Collecting an orb grants a shield of that color — if everyone chases one color, the opposite shield never forms and the raid wipes.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-S">02</div><div><div class="tier-name">Deus Research Base — Boss: Artiel</div><div class="tier-desc">Fast-paced boss that mixes patterns quickly. At certain HP thresholds it destroys the map's outer edge, shrinking the arena and increasing hazard density; its knockback attacks can then knock you off the map. From stage 4 onward it alternates two contradictory chain mechanics — "You can't escape me" (move <i>away</i> from the boss) and "Bound in chains" (move <i>toward</i>/stick to the boss) — reading the callout correctly matters more than reflexes here.</div></div></div>
+        <div class="note">※ Higher Transcendence stages (1–10) scale monster stats, add dungeon-wide weather effects, and give named bosses additional/stronger patterns on top of the above.</div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <h2>Cradle of Desire (무의 요람) <span style="color:var(--muted);font-weight:400;font-size:12px">— expedition</span></h2>
+        <div class="tier-row"><div class="tier-badge tier-A">01</div><div><div class="tier-name">Multidimensional Beltiras</div><div class="tier-desc">Bait the boss's charge attack into a pillar to destroy it. "Nebula Collapse" summons 8 blue orbs around the boss — lure your ground-targeted zones onto them to destroy the orbs before they resolve.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-S">02</div><div><div class="tier-name">Anguished Bakarma (final boss)</div><div class="tier-desc">Watch the boss's color/dialogue cue, then hide behind the tombstone matching that color so the boss rams into it instead of the raid.</div></div></div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <h2>Fierce Horn Cave (사나운 뿔 암굴)</h2>
+        <div class="tier-row"><div class="tier-badge tier-B">01</div><div><div class="tier-name">Kuhapu the Rabid Hound</div><div class="tier-desc">Manage the lightning orb mechanic — don't let orbs go unhandled.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-B">02</div><div><div class="tier-name">Glowing Lycan Totem</div><div class="tier-desc">Use the bombs provided to clear adds during the fight.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-B">03</div><div><div class="tier-name">Necromancer Duanka</div><div class="tier-desc">Avoid standing in the explosion ground-zones.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-B">04</div><div><div class="tier-name">Fierce Horn Nuakum</div><div class="tier-desc">Actively manage/avoid the debuff ground-zones rather than tanking them.</div></div></div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <h2>Temple of Fire (불의 신전) <span style="color:var(--muted);font-weight:400;font-size:12px">— nicknamed "the Wall of Tears," a known difficulty spike</span></h2>
+        <div class="note" style="margin-top:0">Boss: Chromede's Desire. Widely reported as one of the harder difficulty gates in current content, but we couldn't source a clear, sourced breakdown of its specific boss patterns the way we could for the dungeons above — treat this entry as "known to be hard," not a mechanics guide, until better sources turn up.</div>
+      </div>
+    </div>
+
+    <!-- Term Glossary -->
+    <div id="sub-glossary" class="subtabpanel">
+      <div class="card">
+        <h2>Korean/Chinese ↔ English Term Glossary</h2>
+        <div class="note" style="margin-top:0">This app mixes translated English with the original Korean/Chinese terms throughout, since official English localization doesn't exist yet for most of these systems. Use this as a lookup when a term elsewhere in the app looks unfamiliar.</div>
+        <table class="attr">
+          <tr><th>Original</th><th>English Used In This App</th><th>Notes</th></tr>
+          <tr><td>전투력</td><td>Combat Power</td><td>Official, server-computed gear-level score</td></tr>
+          <tr><td>아툴 (Atool)</td><td>Atool</td><td>Community DPS-estimate score, distinct from Combat Power</td></tr>
+          <tr><td>강타</td><td>Smite</td><td>~2× damage proc</td></tr>
+          <tr><td>완벽</td><td>Perfect</td><td>Locks damage to weapon's max roll</td></tr>
+          <tr><td>다단히트</td><td>Multi-Hit</td><td>Cascading extra-hit proc</td></tr>
+          <tr><td>관통</td><td>Penetration</td><td></td></tr>
+          <tr><td>명중</td><td>Accuracy</td><td>Avoids the Parry damage penalty</td></tr>
+          <tr><td>회피 / 막기</td><td>Evasion / Block / Parry</td><td>Parry from missed Accuracy halves damage</td></tr>
+          <tr><td>파괴</td><td>Destruction</td><td>Core attribute, feeds Attack Increase Rate</td></tr>
+          <tr><td>위력</td><td>Power</td><td>Core attribute, feeds Attack Increase Rate</td></tr>
+          <tr><td>돌파(강화)</td><td>Breakthrough</td><td>Gear-bound Attack Increase Rate bonus</td></tr>
+          <tr><td>각인</td><td>Engraving</td><td>Manastone/Godstone/Soul Engraving — see Itemization Pipeline in Combat Power tab</td></tr>
+          <tr><td>영혼각인</td><td>Soul Engraving</td><td>Random substat on every gear piece</td></tr>
+          <tr><td>신석각인</td><td>Godstone Engraving</td><td>On-hit CC proc effects</td></tr>
+          <tr><td>아르카나</td><td>Arcana</td><td>See the Arcana Deck Simulator tab</td></tr>
+          <tr><td>만신전</td><td>Pantheon</td><td>Deity-stat statue system</td></tr>
+          <tr><td>주신 / 신 스탯</td><td>Deity Stat</td><td>+0.20%/point conversion rate</td></tr>
+          <tr><td>초월</td><td>Transcendence</td><td>10-stage endgame dungeon</td></tr>
+          <tr><td>원정</td><td>Expedition</td><td>Multi-boss dungeon content</td></tr>
+          <tr><td>정복 / 어려움 / 보통</td><td>Conquest / Hard / Normal</td><td>Expedition difficulty tiers</td></tr>
+          <tr><td>펫 이해도</td><td>Pet Understanding</td><td>Pet leveling system</td></tr>
+          <tr><td>종족 이해도</td><td>Race Understanding</td><td>Pet-race passive bonus system</td></tr>
+          <tr><td>칭호</td><td>Title</td><td>4 grades: Common/Rare/Transcendent/Unique</td></tr>
+          <tr><td>슈고 페스타</td><td>Shugo Festa</td><td>Recurring daily event</td></tr>
+          <tr><td>시공 균열 / 時空裂縫</td><td>Time Rift</td><td>Fixed-schedule Taiwan-server event</td></tr>
+          <tr><td>마석 / 영석</td><td>Manastone / Spiritstone</td><td>Socketed stat gems</td></tr>
+          <tr><td>키나</td><td>Kinah</td><td>In-game gold currency</td></tr>
+          <tr><td>오드</td><td>Od</td><td>A limited-supply resource</td></tr>
+          <tr><td>데바니온 (보드)</td><td>Devanion (Board)</td><td>An item-level progression board</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <!-- /tab-guides -->
+
+  <div id="tab-other" class="tabpanel">
+    <div class="callout" style="margin-top:0">
+      <b>⚠ BETA — timers are tuned for the Taiwan (台服) server</b>, sourced from Taiwan/Chinese community coverage (Bilibili, 巴哈姆特/biubiu001, 9game, official 台服 patch notes) rather than the Korean sources used elsewhere in this app. Regular field-boss cooldowns were reportedly halved in a December patch and are volatile, so we deliberately did not hardcode Korean-server numbers here — anything without a confirmed Taiwan source is left blank for you to fill in and verify in-game. These sub-tabs otherwise replicate the most-used Korean/Taiwanese community tool sites (아툴/Atool, 아이온즈/Aions, BUSON2, AION2Craft) as offline calculators — this app has no live connection to the game, so anything those sites pull from your account or the auction house can't be reproduced here.
+    </div>
+
+    <div class="subtabs">
+      <button class="subtab-btn active" data-subtab="checklist">Daily/Weekly Checklist</button>
+      <button class="subtab-btn" data-subtab="bosstimer">Boss/Event Timer</button>
+      <button class="subtab-btn" data-subtab="patchnotes">Patch Notes</button>
+      <button class="subtab-btn" data-subtab="enhance">Enhancement Cost Calculator</button>
+      <button class="subtab-btn" data-subtab="craft">Crafting Profit Calculator</button>
+    </div>
+
+    <!-- Checklist -->
+    <div id="sub-checklist" class="subtabpanel active">
+      <div class="grid">
+        <div class="card">
+          <h2>Daily Checklist <span style="color:var(--muted);font-weight:400;font-size:12px">— reset hour not confirmed for Taiwan server</span></h2>
+          <div class="chk-reset" id="dailyResetInfo">—</div>
+          <div id="dailyItems"></div>
+          <div class="progress-track"><div class="progress-fill" id="dailyProgress" style="width:0%"></div></div>
+          <div class="note">
+            ※ We could not confirm an exact daily reset hour for the Taiwan server specifically (Korea's is 5:00 AM local, but regional publishers commonly set their own maintenance window) — set this to match what you observe in-game.<br>
+            <label style="color:var(--muted)">Daily/weekly reset hour, Taiwan time / UTC+8 (0-23): <input type="number" id="dailyResetHour" value="7" min="0" max="23" style="width:60px;background:#12121c;border:1px solid var(--line);border-radius:6px;color:var(--txt);padding:3px 6px;font-family:inherit"></label>
+          </div>
+        </div>
+        <div class="card2">
+          <h2 class="r">Weekly Checklist <span style="color:var(--muted);font-weight:400;font-size:12px">— resets after Wednesday maintenance</span></h2>
+          <div class="chk-reset" id="weeklyResetInfo">—</div>
+          <div id="weeklyItems"></div>
+          <div class="progress-track"><div class="progress-fill" id="weeklyProgress" style="width:0%"></div></div>
+          <div class="note">※ Taiwan-server sources confirm the weekly reset lands after Wednesday maintenance; a recent maintenance window ran 3:30–7:00 AM, so 7:00 AM is used as an approximation above — adjust the daily reset hour setting if your server's maintenance ends at a different time. Un-check anything your character doesn't have unlocked yet; your checks are remembered between launches.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Boss/Event Timer -->
+    <div id="sub-bosstimer" class="subtabpanel">
+      <div class="card">
+        <h2>Time Rift Schedule <span style="color:var(--muted);font-weight:400;font-size:12px">— 時空裂縫, fixed daily schedule, Taiwan server</span></h2>
+        <div class="pockets" style="grid-template-columns:1fr 1fr">
+          <div class="pk"><div class="n">Status</div><div class="v" id="riftStatus" style="font-size:20px">—</div></div>
+          <div class="pk"><div class="n">Countdown</div><div class="v" id="riftCountdown" style="font-size:20px">—</div></div>
+        </div>
+        <div class="note">
+          ※ Confirmed Taiwan-server schedule: opens every 3 hours at 02:00 / 05:00 / 08:00 / 11:00 / 14:00 / 17:00 / 20:00 / 23:00 (Taiwan time, UTC+8), each entrance staying open for 30 minutes. This countdown is computed from that fixed schedule directly — it doesn't depend on your computer's local timezone setting.
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <h2>World Boss & Field Boss Timers <span style="color:var(--muted);font-weight:400;font-size:12px">— kill-time based</span></h2>
+        <div class="boss-row" style="border-bottom:1px solid var(--line);padding-bottom:8px;font-size:10.5px;color:var(--muted);font-weight:700;letter-spacing:.5px">
+          <div>NAME</div><div>COOLDOWN (hrs)</div><div>LAST KILLED</div><div>NEXT SPAWN</div><div></div>
+        </div>
+        <div id="bossRows"></div>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button class="btn ghost" id="addBossRow">+ Add Boss/Event Timer</button>
+        </div>
+        <div class="note">
+          ※ Seeded with the three confirmed top-tier world bosses (12-hour cooldown, up to 2 kills/day): Legion Commander Ragata (Red Forest / Ragata Fortress), Eternal Kaltuya (Eternal Island, Elyos), Undying Kaltuya (Undying Island, Asmodian).<br>
+          ※ Regular field-boss cooldowns are NOT seeded here — Taiwan-server coverage reports they were broadly halved in a December patch and remain volatile, so we didn't want to bake in numbers we couldn't confirm. Add your own rows with cooldowns you've verified in-game or in server chat.<br>
+          ※ Loot from a killed boss reportedly despawns after just 2 minutes — pick it up fast.<br>
+          ※ Click "Last Killed → Now" right after a kill to start that boss's countdown. Timers keep counting even while the app is closed (based on the saved kill time), and persist between launches.
+        </div>
+      </div>
+    </div>
+
+    <!-- Patch Notes -->
+    <div id="sub-patchnotes" class="subtabpanel">
+      <div class="card">
+        <h2>Latest Patch Notes <span style="color:var(--muted);font-weight:400;font-size:12px">— auto-fetch, experimental</span></h2>
+        <div class="note" style="margin-top:0">No officially documented RSS/Atom feed for Aion2 patch notes turned up in research, so this tries a short list of likely feed URLs on sites known to publish English translations of the official notes. It may well come back empty — that's expected, not broken. Use the direct links below either way.</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:10px">
+          <button class="btn" id="checkPatchNotes">Check for Updates</button>
+          <span id="patchNotesStatus" style="font-size:12px;color:var(--muted)"></span>
+        </div>
+        <div id="patchNotesResults" style="margin-top:14px"></div>
+      </div>
+      <div class="card" style="margin-top:18px">
+        <h2 style="color:var(--gold)">Official & Community Patch Note Sources <span style="color:var(--muted);font-weight:400;font-size:12px">— always available, opens in your browser</span></h2>
+        <div class="tier-row"><div class="tier-badge tier-A">EN</div><div><div class="tier-name">AION2 Hub — Official Update Notes (KR & Global), in English</div><div class="tier-desc"><a href="https://aion2hub.com/updates" target="_blank" rel="noopener">aion2hub.com/updates</a></div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-A">EN</div><div><div class="tier-name">NCsoft Official Newsroom (Global)</div><div class="tier-desc"><a href="https://www.nc.com/newsroom" target="_blank" rel="noopener">nc.com/newsroom</a></div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-B">EN</div><div><div class="tier-name">QuestLog.gg — Aion 2 Patch Notes</div><div class="tier-desc"><a href="https://questlog.gg/aion-2/en/patch-notes" target="_blank" rel="noopener">questlog.gg/aion-2/en/patch-notes</a></div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-B">EN</div><div><div class="tier-name">Shugo.GG — AION 2 News & Updates</div><div class="tier-desc"><a href="https://shugo.gg/news" target="_blank" rel="noopener">shugo.gg/news</a></div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-C">KR</div><div><div class="tier-name">AION2-NC — Official Korean patch notes (source language)</div><div class="tier-desc"><a href="https://aion2.plaync.com" target="_blank" rel="noopener">aion2.plaync.com</a></div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-C">TW</div><div><div class="tier-name">Aion 2 Taiwan — Game Updates & Patch Notes</div><div class="tier-desc"><a href="https://aion2t.com/news" target="_blank" rel="noopener">aion2t.com/news</a></div></div></div>
+      </div>
+    </div>
+
+    <!-- Enhancement Cost Calculator -->
+    <div id="sub-enhance" class="subtabpanel">
+      <div class="card">
+        <h2>Enhancement Cost Calculator <span style="color:var(--muted);font-weight:400;font-size:12px">— general expected-value math, like Atool's 강화 효율 계산기</span></h2>
+        <div class="note" style="margin-top:0">We couldn't source a reliable, complete per-stage success-rate/material table (it changes by item grade and gets patched), so this uses the same expected-value math those calculators run — enter your own per-stage success rate and cost per attempt (from the in-game enhancement window) and it computes the rest. Add one row per stage you're planning to push through.</div>
+        <div class="stage-row" style="font-size:10.5px;color:var(--muted);font-weight:700;letter-spacing:.5px">
+          <div>STAGE</div><div>SUCCESS %</div><div>COST / ATTEMPT (Kinah)</div><div></div>
+        </div>
+        <div id="stageRows"></div>
+        <button class="btn ghost" id="addStageRow" style="margin-top:10px">+ Add Stage</button>
+        <div class="divider"></div>
+        <div class="pockets">
+          <div class="pk"><div class="n">Expected Total Attempts</div><div class="v" id="enhAttempts">—</div></div>
+          <div class="pk"><div class="n">Expected Total Cost</div><div class="v" id="enhCost">—</div></div>
+          <div class="pk"><div class="n">Stages Planned</div><div class="v" id="enhStages">0</div></div>
+        </div>
+        <div class="note">※ Per stage, expected attempts = 1 ÷ success rate (standard geometric-distribution expectation, assumes no pity/protection mechanic). Total is the sum across every stage row — this is the same "average case" math as the Korean community's calculators, not an official Aion2 number.</div>
+      </div>
+    </div>
+
+    <!-- Crafting Profit Calculator -->
+    <div id="sub-craft" class="subtabpanel">
+      <div class="card">
+        <h2>Crafting Profit Calculator <span style="color:var(--muted);font-weight:400;font-size:12px">— manual version of AION2Craft / interactive-map profit tools</span></h2>
+        <div class="note" style="margin-top:0">Sites like AION2Craft and the community interactive map pull live auction-house prices automatically — this app has no live game connection, so enter your own current material costs and expected sale price instead.</div>
+        <div class="mat-row" style="font-size:10.5px;color:var(--muted);font-weight:700;letter-spacing:.5px">
+          <div>MATERIAL</div><div>QTY</div><div>UNIT COST (Kinah)</div><div></div>
+        </div>
+        <div id="matRows"></div>
+        <button class="btn ghost" id="addMatRow" style="margin-top:10px">+ Add Material</button>
+        <div class="divider"></div>
+        <div class="field"><label>Expected Sale Price (Kinah)</label><input type="number" id="craftSale" value="0"></div>
+        <div class="field"><label>Auction House / Broker Fee %</label><input type="number" id="craftFee" value="0" step="0.1"></div>
+        <div class="divider"></div>
+        <div class="pockets">
+          <div class="pk"><div class="n">Total Material Cost</div><div class="v" id="craftMatCost">—</div></div>
+          <div class="pk"><div class="n">Net Profit</div><div class="v" id="craftProfit">—</div></div>
+          <div class="pk"><div class="n">Margin</div><div class="v" id="craftMargin">—</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /tab-other -->
+
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const ids = ['atk','atkNaked','destr','power','brk','wdmg','amp','pve','boss','cdmg','rear','smite','crate','back','resist','sbuff','sAtk','sW','sAmp','sCrit','sRear','sSmite'];
+ids.forEach(id => $(id).addEventListener('input', calc));
+
+const fmt = n => n.toLocaleString('en-US', {maximumFractionDigits:0});
+const pct = n => (n>=0?'+':'') + n.toFixed(2) + '%';
+
+function calc(){
+  const v = {}; ids.forEach(id => v[id] = parseFloat($(id).value) || 0);
+  const warn = $('warn'); warn.style.display='none';
+
+  // Auto-computed Increase Rate: Destruction 0.2%/pt + Power 0.1%/pt; Breakthrough +5%/slot (bound to gear, excluded when unequipped)
+  const incOff = v.destr*0.2 + v.power*0.1;
+  const incOn = incOff + v.brk*5;
+  $('incView').textContent = `Attack Increase Rate: Equipped ${incOn.toFixed(1)}% · Unequipped ${incOff.toFixed(1)}%`;
+  const onM = 1 + incOn/100, offM = 1 + incOff/100;
+  // Derive Gear Attack / Base Attack from equipped vs. unequipped totals
+  const gear = (v.atk - v.atkNaked * onM/offM) / onM;
+  const base = v.atkNaked / offM;
+  if ((v.atk || v.atkNaked) && (gear <= 0 || base < 0)){ warn.textContent = '⚠ Please check your Attack Power / Increase Rate inputs (Gear Attack computed as 0 or less)'; warn.style.display='block'; }
+  const wM = 1 + v.wdmg/100;
+  const eff = (gear * wM + base) * onM;
+
+  // Multipliers
+  const ampSum = v.amp + v.pve + v.boss;
+  const mAmp = 1 + ampSum/100;
+  const critMul = (150 + v.cdmg)/100;
+  const c = Math.min(v.crate,100)/100;
+  const mCrit = 1 + c * (critMul - 1);
+  const smiteProc = Math.max(0, Math.min(v.smite + v.sbuff, 100) - v.resist);
+  const mSmite = 1 + smiteProc/100;
+  const b = Math.min(v.back,100)/100;
+  const mRear = 1 + b * v.rear/100;
+
+  // Pocket display
+  $('pBase').textContent = fmt(base);
+  $('pBaseM').textContent = '× ' + onM.toFixed(2);
+  $('pGear').textContent = fmt(gear);
+  $('pGearM').textContent = '× ' + (wM*onM).toFixed(2) + ' (Weapon Dmg Amp × Increase Rate)';
+  $('pEff').textContent = fmt(eff);
+
+  $('mults').innerHTML =
+    `<span class="mtag">Final Dmg Amp <b>× ${mAmp.toFixed(3)}</b></span>
+     <span class="mtag">Crit Expected <b>× ${mCrit.toFixed(3)}</b></span>
+     <span class="mtag">Smite Expected <b>× ${mSmite.toFixed(3)}</b> (actual proc ${smiteProc.toFixed(1)}%)</span>
+     <span class="mtag">Front/Back Expected <b>× ${mRear.toFixed(3)}</b></span>`;
+
+  // +1%p efficiency
+  const smiteCapped = (v.smite + v.sbuff) >= 100;
+  const list = [
+    {name:'Front/Back Damage Amp', val: (b*0.01)/mRear*100, c:'#e63950'},
+    {name:'Smite', val: smiteCapped ? 0 : 0.01/mSmite*100, c:'#c8425a', tag: smiteCapped?'(proc rate at 100%)':''},
+    {name:'Weapon Damage Amp', val: eff>0 ? (gear*0.01*onM)/eff*100 : 0, c:'#ad4b62'},
+    {name:'Attack Increase Rate', val: 0.01/onM*100, c:'#8f5468'},
+    {name:'Critical Damage Amp', val: (c*0.01)/mCrit*100, c:'#6e5c6c'},
+    {name:'Damage Amp', val: 0.01/mAmp*100, c:'#5e5e72'},
+  ].sort((a,x)=>x.val-a.val);
+
+  const max = Math.max(...list.map(x=>x.val), 0.0001);
+  $('bars').innerHTML = list.map(x=>{
+    const w = Math.max(x.val/max*100, 2);
+    const inside = w > 30;
+    return `<div class="bar-row"><div class="bar-name">${x.name}${x.tag?'<br><span style="font-size:10px;color:var(--muted)">'+x.tag+'</span>':''}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:${x.c}">${inside?pct(x.val):''}</div>
+      ${inside?'':`<span class="bar-val" style="left:${w}%">${pct(x.val)}</span>`}</div></div>`;
+  }).join('');
+
+  // Flat attack power conversion
+  const flats = [
+    {name:'Attack +10 (Manastone/Gear)', d: 10 * wM * onM},
+    {name:'Max Attack +20 (Pet)', d: 10 * wM * onM},
+    {name:'Bonus Attack +16 (Pet)', d: 16 * onM},
+    {name:'Bonus Attack +10 (Pet)', d: 10 * onM},
+    {name:'PVE Attack +10', d: 10},
+  ];
+  const fmax = Math.max(...flats.map(x=> eff>0 ? x.d/eff*100 : 0), 0.0001);
+  $('flats').innerHTML = '<div style="font-size:11.5px;color:var(--muted);font-weight:700;letter-spacing:1px;margin-bottom:6px">Flat Attack Power Option Conversion</div>' +
+    flats.map(x=>{
+      const val = eff>0 ? x.d/eff*100 : 0;
+      const w = Math.max(val/fmax*60, 2);
+      return `<div class="bar-row"><div class="bar-name">${x.name}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:#e0b45c"></div>
+        <span class="bar-val" style="left:${w}%">${pct(val)} <span style="color:var(--muted);font-weight:400;font-size:11px">&nbsp;effective +${x.d.toFixed(1)}</span></span></div></div>`;
+    }).join('');
+
+  // Option simulator: full recalculation
+  const D0 = eff * mAmp * mCrit * mSmite * mRear;
+  const gear2 = gear + v.sAtk;
+  const wM2 = 1 + (v.wdmg + v.sW)/100;
+  const eff2 = (gear2 * wM2 + base) * onM;
+  const mAmp2 = 1 + (ampSum + v.sAmp)/100;
+  const critMul2 = (150 + v.cdmg + v.sCrit)/100;
+  const mCrit2 = 1 + c * (critMul2 - 1);
+  const smiteProc2 = Math.max(0, Math.min(v.smite + v.sSmite + v.sbuff, 100) - v.resist);
+  const mSmite2 = 1 + smiteProc2/100;
+  const mRear2 = 1 + b * (v.rear + v.sRear)/100;
+  const D1 = eff2 * mAmp2 * mCrit2 * mSmite2 * mRear2;
+  const gain = D0>0 ? (D1/D0 - 1) * 100 : 0;
+  $('simOut').textContent = D0>0 ? pct(gain) : '—';
+  $('simDetail').textContent = 'Effective Attack ' + fmt(eff) + ' → ' + fmt(eff2);
+}
+calc();
+
+// ---- Tabs ----
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tabpanel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    $('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ---- Combat Power: Arcana (exact, fixed per-grade values) ----
+const ARC_GRADES = [
+  {v:0, label:'Empty'},
+  {v:20, label:'Common (+20)'},
+  {v:40, label:'Rare (+40)'},
+  {v:60, label:'Legendary (+60)'},
+  {v:80, label:'Unique (+80)'},
+];
+const arcGrid = $('arcGrid');
+arcGrid.innerHTML = [1,2,3,4,5].map(i => `
+  <div class="arc-slot">
+    <div class="n">Slot ${i}</div>
+    <select id="arc${i}">
+      ${ARC_GRADES.map(g => `<option value="${g.v}">${g.label}</option>`).join('')}
+    </select>
+  </div>`).join('');
+[1,2,3,4,5].forEach(i => $('arc' + i).addEventListener('change', calcArcana));
+
+function calcArcana(){
+  const vals = [1,2,3,4,5].map(i => parseInt($('arc' + i).value, 10) || 0);
+  const total = vals.reduce((a,b) => a+b, 0);
+  $('arcTotal').textContent = fmt(total);
+  const filled = vals.filter(v => v > 0);
+  const allSameGrade = filled.length === 5 && filled.every(v => v === filled[0]);
+  $('arcSetNote').textContent = allSameGrade
+    ? 'All 5 slots same grade — full set bonus should be active in-game'
+    : (filled.length + '/5 slots filled');
+}
+calcArcana();
+
+// ---- Combat Power: Stat Priority Tiers (qualitative, sourced from community guides) ----
+const TIERS = [
+  {t:'S', name:'Attack Power & Damage Amplification', desc:'Consistently reported as the largest Combat Power driver — prioritize weapon/accessory attack and breakthrough before armor breakthrough.'},
+  {t:'S', name:'Smite, Accuracy & Critical', desc:'A 2026 patch explicitly raised these three stats\' weight in the official Combat Power formula (players reported their CP number rising from it), making them the current fast track to a higher displayed CP — independent of how much they actually help your damage (see the DPS list below).'},
+  {t:'A', name:'Arcana Grade', desc:'Fixed, guaranteed Combat Power per slot regardless of stat roll (see calculator above) — one of the few fully predictable sources.'},
+  {t:'B', name:'Defense & Max HP', desc:'Meaningful for survivability and party viability, but multiple guides note tank/guardian builds do not see inflated Combat Power from stacking these alone.'},
+  {t:'C', name:'Penetration & Spirit', desc:'The same 2026 patch that buffed Smite/Accuracy/Critical explicitly lowered Penetration and Spirit\'s Combat Power weight — players reported their CP dropping after the patch purely from this reweighting, with no gear changes.'},
+  {t:'C', name:'Evasion & Block', desc:'Situationally useful for survivability, but reported as low-weight in the Combat Power figure itself.'},
+];
+$('tierList').innerHTML = TIERS.map(x => `
+  <div class="tier-row">
+    <div class="tier-badge tier-${x.t}">${x.t}</div>
+    <div><div class="tier-name">${x.name}</div><div class="tier-desc">${x.desc}</div></div>
+  </div>`).join('');
+
+// ---- Combat Power: Real DPS Priority (cross-region community consensus) ----
+const DPS_LIST = [
+  {n:1, name:'Weapon Damage Amp & Smite', desc:'Ranked #1 by both Korean Atool guides and Taiwanese tier breakdowns — Smite roughly doubles a hit\'s damage when it procs.'},
+  {n:2, name:'Attack Speed / Cooldown Reduction', desc:'One of the Korean "3 must-have options" (with Weapon Dmg Amp and Power) and Taiwan\'s #3 pick — more actions per second compounds with everything else.'},
+  {n:3, name:'Rear/Back Attack Amp & Critical Damage Amp', desc:'High and stable once you can reliably land rear attacks; Critical Damage keeps paying off even after Critical Rate is capped.'},
+  {n:4, name:'Attack Power & Critical Rate', desc:'Still valuable, but both run into an overflow cap — once class passives + breakthrough + party buffs already push Attack% or Crit Rate to their cap, more of the same stat is worth 0%.'},
+  {n:5, name:'Accuracy — only up to your hit-rate threshold', desc:'Must clear the Parry threshold (missing halves your damage) but is reported as the lowest-value stat to over-invest in once you\'re reliably hitting — despite currently being weighted heavily in the official CP number.'},
+  {n:6, name:'Penetration', desc:'Ranked lowest by the Taiwan tier list and explicitly de-weighted in the KR Combat Power formula — reported as most efficient for very high-hit-count classes, low value otherwise.'},
+];
+$('dpsList').innerHTML = DPS_LIST.map(x => `
+  <div class="tier-row">
+    <div class="tier-badge tier-${x.n<=1?'S':x.n<=3?'A':x.n<=4?'B':'C'}">${x.n}</div>
+    <div><div class="tier-name">${x.name}</div><div class="tier-desc">${x.desc}</div></div>
+  </div>`).join('');
+
+// ---- Combat Power: Accuracy & Hit Mechanics (confirmed numbers) ----
+function calcAccuracy(){
+  const acc = parseFloat($('cpAcc').value) || 0;
+  const rate = Math.min(50 + acc/100*10, 100);
+  $('cpAccOut').textContent = rate.toFixed(1) + '%';
+}
+$('cpAcc').addEventListener('input', calcAccuracy);
+calcAccuracy();
+
+// ---- Combat Power: Attribute -> Derived Stat Planner (exact confirmed rates) ----
+const ATTR_MAP = [
+  ['atMight', 0.10], ['atCon', 0.10], ['atDex', 0.10], ['atPre', 0.10], ['atInt', 0.10], ['atWill', 0.10],
+  ['atJustice', 0.20], ['atFreedom', 0.20], ['atIllusion', 0.20], ['atLife', 0.20], ['atTime', 0.20],
+  ['atWisdom', 0.20], ['atDeath', 0.20], ['atDestruction', 0.20], ['atOtherDeity', 0.20],
+];
+function calcAttrPlanner(){
+  ATTR_MAP.forEach(([id, rate]) => {
+    const pts = parseFloat($(id).value) || 0;
+    $(id + 'Out').textContent = pct(pts * rate);
+  });
+}
+ATTR_MAP.forEach(([id]) => $(id).addEventListener('input', calcAttrPlanner));
+calcAttrPlanner();
+
+// ---- Sub-tabs (scoped per parent main tab, since Guides and Other each have their own) ----
+document.querySelectorAll('.subtab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const scope = btn.closest('.tabpanel');
+    scope.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+    scope.querySelectorAll('.subtabpanel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    scope.querySelector('#sub-' + btn.dataset.subtab).classList.add('active');
+  });
+});
+
+// ---- Other: local storage helper ----
+function loadJSON(key, fallback){
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+  catch(e) { return fallback; }
+}
+function saveJSON(key, val){
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+}
+
+// ---- Other: Daily/Weekly Checklist ----
+const DAILY_TASKS = [
+  {id:'mission', name:'Mission (사명 / 임무)', desc:'Daily duty quests from the journal — includes the Bounty Order sub-quest, which has a chance at Unique-grade gear.'},
+  {id:'supply-daily', name:'Emergency Supply Request (긴급 보급 의뢰)', desc:'Daily Abyss supply request — resets every day.'},
+  {id:'shugo', name:'Shugo Festa (슈고 페스타)', desc:'Recurring daily festival/event task.'},
+];
+const WEEKLY_TASKS = [
+  {id:'shop-convert', name:'Shop / Material Conversion (상점 · 물질 변환)', desc:'Weekly currency/material exchange at the relevant vendor.'},
+  {id:'directive', name:'Directive (지령)', desc:'Weekly directive/order tasks.'},
+  {id:'daily-dungeon', name:'Daily Dungeon (1일 던전)', desc:'Despite the name, entries are limited on a weekly basis.'},
+  {id:'nightmare', name:'Nightmare Dungeon (악몽)', desc:'Weekly nightmare-difficulty dungeon.'},
+  {id:'awakening', name:'Awakening / Subjugation Battle (각성전 · 토벌전)', desc:'Weekly boss battle content.'},
+  {id:'supply-weekly', name:'Supply Request (보급 의뢰)', desc:'Weekly variant of the supply request, separate from the daily one.'},
+];
+
+function getDailyPeriodStart(resetHour, now){
+  const d = new Date(now);
+  d.setHours(resetHour, 0, 0, 0);
+  if (now < d) d.setDate(d.getDate() - 1);
+  return d;
+}
+function getWeeklyPeriodStart(resetHour, now){
+  const d = new Date(now);
+  d.setHours(resetHour, 0, 0, 0);
+  const diff = (d.getDay() - 3 + 7) % 7; // 3 = Wednesday
+  d.setDate(d.getDate() - diff);
+  if (now < d) d.setDate(d.getDate() - 7);
+  return d;
+}
+function fmtDateTime(d){
+  return d.toLocaleString('en-US', {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'});
+}
+
+function renderChecklist(kind, tasks, resetHour, periodFn, addDays){
+  const state = loadJSON('bnrc_' + kind, {periodStart:null, checked:{}});
+  const now = new Date();
+  const periodStart = periodFn(resetHour, now);
+  if (state.periodStart !== periodStart.toISOString()){
+    state.periodStart = periodStart.toISOString();
+    state.checked = {};
+    saveJSON('bnrc_' + kind, state);
+  }
+  const nextReset = new Date(periodStart.getTime());
+  nextReset.setDate(nextReset.getDate() + addDays);
+  $(kind + 'ResetInfo').textContent = 'Next reset: ' + fmtDateTime(nextReset);
+
+  $(kind + 'Items').innerHTML = tasks.map(t => `
+    <div class="chk-item ${state.checked[t.id] ? 'done' : ''}" data-id="${t.id}">
+      <input type="checkbox" ${state.checked[t.id] ? 'checked' : ''}>
+      <div><div class="chk-name">${t.name}</div><div class="chk-desc">${t.desc}</div></div>
+    </div>`).join('');
+
+  $(kind + 'Items').querySelectorAll('.chk-item').forEach(row => {
+    row.querySelector('input').addEventListener('change', e => {
+      const st = loadJSON('bnrc_' + kind, {periodStart: periodStart.toISOString(), checked:{}});
+      st.checked[row.dataset.id] = e.target.checked;
+      saveJSON('bnrc_' + kind, st);
+      row.classList.toggle('done', e.target.checked);
+      updateProgress(kind, tasks);
+    });
+  });
+  updateProgress(kind, tasks);
+}
+function updateProgress(kind, tasks){
+  const state = loadJSON('bnrc_' + kind, {checked:{}});
+  const done = tasks.filter(t => state.checked[t.id]).length;
+  $(kind + 'Progress').style.width = (done / tasks.length * 100) + '%';
+}
+function refreshChecklists(){
+  const dailyHour = parseInt($('dailyResetHour').value, 10) || 5;
+  renderChecklist('daily', DAILY_TASKS, dailyHour, getDailyPeriodStart, 1);
+  renderChecklist('weekly', WEEKLY_TASKS, dailyHour, getWeeklyPeriodStart, 7);
+}
+$('dailyResetHour').addEventListener('input', refreshChecklists);
+refreshChecklists();
+setInterval(refreshChecklists, 60000);
+
+// ---- Other: Field Boss / Event Timer ----
+let bossRows = loadJSON('bnrc_bossRows_tw', [
+  {name:'Legion Commander Ragata (Red Forest / Ragata Fortress)', cooldown:12, lastKilled:null},
+  {name:'Eternal Kaltuya (Eternal Island, Elyos)', cooldown:12, lastKilled:null},
+  {name:'Undying Kaltuya (Undying Island, Asmodian)', cooldown:12, lastKilled:null},
+]);
+function saveBossRows(){ saveJSON('bnrc_bossRows_tw', bossRows); }
+function renderBossRows(){
+  $('bossRows').innerHTML = bossRows.map((b, i) => `
+    <div class="boss-row" data-i="${i}">
+      <input class="bname" data-f="name" value="${b.name.replace(/"/g,'&quot;')}" placeholder="Boss/event name">
+      <input data-f="cooldown" type="number" step="0.1" min="0" value="${b.cooldown}">
+      <button class="btn small ghost" data-act="kill">${b.lastKilled ? fmtDateTime(new Date(b.lastKilled)) : 'Set: Killed Now'}</button>
+      <span class="boss-countdown" data-out="countdown">—</span>
+      <button class="row-x" data-act="remove">✕</button>
+    </div>`).join('');
+  updateBossCountdowns();
+}
+$('bossRows').addEventListener('input', e => {
+  const row = e.target.closest('.boss-row'); if (!row) return;
+  const i = parseInt(row.dataset.i, 10);
+  const f = e.target.dataset.f;
+  if (f === 'name') bossRows[i].name = e.target.value;
+  if (f === 'cooldown') bossRows[i].cooldown = parseFloat(e.target.value) || 0;
+  saveBossRows();
+});
+$('bossRows').addEventListener('click', e => {
+  const row = e.target.closest('.boss-row'); if (!row) return;
+  const i = parseInt(row.dataset.i, 10);
+  if (e.target.dataset.act === 'kill'){ bossRows[i].lastKilled = Date.now(); saveBossRows(); renderBossRows(); }
+  if (e.target.dataset.act === 'remove'){ bossRows.splice(i, 1); saveBossRows(); renderBossRows(); }
+});
+$('addBossRow').addEventListener('click', () => {
+  bossRows.push({name:'New Boss/Event', cooldown:1, lastKilled:null});
+  saveBossRows();
+  renderBossRows();
+});
+function updateBossCountdowns(){
+  const now = Date.now();
+  $('bossRows').querySelectorAll('.boss-row').forEach(row => {
+    const i = parseInt(row.dataset.i, 10);
+    const b = bossRows[i];
+    const out = row.querySelector('[data-out="countdown"]');
+    if (!b.lastKilled){ out.textContent = '—'; out.classList.remove('ready'); return; }
+    const next = b.lastKilled + b.cooldown * 3600000;
+    const remain = next - now;
+    if (remain <= 0){ out.textContent = 'READY'; out.classList.add('ready'); return; }
+    out.classList.remove('ready');
+    const h = Math.floor(remain / 3600000);
+    const m = Math.floor((remain % 3600000) / 60000);
+    const s = Math.floor((remain % 60000) / 1000);
+    out.textContent = `${h}h ${m}m ${s}s`;
+  });
+}
+renderBossRows();
+setInterval(updateBossCountdowns, 1000);
+
+// ---- Other: Time Rift fixed schedule (Taiwan server, UTC+8) ----
+const RIFT_HOURS = [2, 5, 8, 11, 14, 17, 20, 23];
+const RIFT_OPEN_MIN = 30;
+function updateRiftTimer(){
+  const TW_OFFSET = 8 * 3600000;
+  const nowUTC = Date.now();
+  const msOfDayTW = ((nowUTC + TW_OFFSET) % 86400000 + 86400000) % 86400000;
+  for (const h of RIFT_HOURS){
+    const start = h * 3600000, end = start + RIFT_OPEN_MIN * 60000;
+    if (msOfDayTW >= start && msOfDayTW < end){
+      const remain = end - msOfDayTW;
+      $('riftStatus').textContent = 'OPEN NOW';
+      $('riftStatus').style.color = 'var(--red)';
+      $('riftCountdown').textContent = 'closes in ' + Math.floor(remain/60000) + 'm ' + Math.floor((remain%60000)/1000) + 's';
+      return;
+    }
+  }
+  let nextStart = null;
+  for (const h of RIFT_HOURS){ const start = h*3600000; if (start > msOfDayTW){ nextStart = start; break; } }
+  if (nextStart === null) nextStart = RIFT_HOURS[0]*3600000 + 86400000;
+  const remain = nextStart - msOfDayTW;
+  const h = Math.floor(remain / 3600000);
+  const m = Math.floor((remain % 3600000) / 60000);
+  const s = Math.floor((remain % 60000) / 1000);
+  $('riftStatus').textContent = 'Closed';
+  $('riftStatus').style.color = 'var(--gold)';
+  $('riftCountdown').textContent = `${h}h ${m}m ${s}s`;
+}
+updateRiftTimer();
+setInterval(updateRiftTimer, 1000);
+
+// ---- Other: Arcana Deck Simulator ----
+const ARCD_GRADES = [
+  {v:0, label:'Empty'},
+  {v:20, label:'Common (+20)'},
+  {v:40, label:'Rare (+40)'},
+  {v:60, label:'Legendary (+60)'},
+  {v:80, label:'Unique (+80)'},
+];
+const ARCD_SETS = ['None', 'Vitality (활력)', 'Magic (마력)', 'Frenzy (광분)', 'Pure Blood (순수한 피)', 'Punishment (징벌)', 'Guardian (수호)', 'Unyielding (불굴)'];
+const ARCD_SLOT_NAMES = ['Chalice (성배)', 'Parchment (양피지)', 'Compass (나침반)', 'Bell (종)', 'Mirror (거울)', 'Scale (천칭)'];
+const SET_EFFECTS = {
+  'Vitality (활력)': '2pc: reported to grant part of a PVE Attack bonus while HP ≥ 70%; 4pc: PVE Attack reported between +70 and +150 while HP ≥ 70% (sources disagree, likely a patch-to-patch buff) — currently considered the strongest all-around hunting/farming set.',
+  'Magic (마력)': 'Grants an important passive skill according to guides, but the specific stat effect was not clearly reported — often used as a 1-2 piece "point" investment alongside a 4pc Vitality base.',
+  'Frenzy (광분)': '4pc: PVE Attack +50, Boss Damage Amp +5%, and Boss Damage Resistance +10% while HP ≤ 70%. Same Pantheon stats as Magic, reportedly stronger effect and cheaper to craft.',
+  'Pure Blood (순수한 피)': '4pc: PVE Defense +500, Critical Damage Amp +5%, and an extra Defense +1000 while HP ≤ 70%. Same Pantheon stats as Vitality, reportedly stronger effect and cheaper to craft.',
+  'Punishment (징벌)': '2pc: Boss Damage Resistance; 4pc: PVE Attack Power up, plus a PVE damage increase while HP ≥ 70%. Reported as the top DPS-focused pick post-Season 3.',
+  'Guardian (수호)': '2pc: Regeneration +5%; 4pc: Weapon Damage Amp +5%, plus a 5-second shield when HP drops to ≤ 30%.',
+  'Unyielding (불굴)': 'Reported effect (piece breakdown unclear): Weapon Damage Resistance +5%, Critical Damage Resistance +5%, and +50% PvP Damage Resistance for 5 seconds when afflicted by a status ailment (150s cooldown) — a PvP-defensive set.',
+};
+let arcDeck = [];
+function ensureArcDeckSize(){
+  const n = Math.max(1, Math.min(12, parseInt($('arcSlotCount').value, 10) || 6));
+  while (arcDeck.length < n) arcDeck.push({grade:0, set:'None'});
+  arcDeck.length = n;
+}
+function renderArcDeck(){
+  ensureArcDeckSize();
+  $('arcDeckRows').innerHTML = arcDeck.map((s, i) => `
+    <div class="arcd-row">
+      <div class="arcd-label">${ARCD_SLOT_NAMES[i] || ('Slot ' + (i+1))}</div>
+      <select data-i="${i}" data-f="grade">
+        ${ARCD_GRADES.map(g => `<option value="${g.v}" ${s.grade===g.v?'selected':''}>${g.label}</option>`).join('')}
+      </select>
+      <select data-i="${i}" data-f="set">
+        ${ARCD_SETS.map(setName => `<option ${s.set===setName?'selected':''}>${setName}</option>`).join('')}
+      </select>
+    </div>`).join('');
+  calcArcDeck();
+}
+$('arcSlotCount').addEventListener('input', renderArcDeck);
+$('arcDeckRows').addEventListener('change', e => {
+  const i = parseInt(e.target.dataset.i, 10);
+  const f = e.target.dataset.f;
+  if (f === 'grade') arcDeck[i].grade = parseInt(e.target.value, 10);
+  if (f === 'set') arcDeck[i].set = e.target.value;
+  calcArcDeck();
+});
+function calcArcDeck(){
+  const total = arcDeck.reduce((sum, s) => sum + s.grade, 0);
+  const filled = arcDeck.filter(s => s.grade > 0).length;
+  $('arcDeckCP').textContent = fmt(total);
+  $('arcDeckFilled').textContent = filled + '/' + arcDeck.length + ' slots filled';
+
+  const counts = {};
+  arcDeck.forEach(s => { if (s.set !== 'None') counts[s.set] = (counts[s.set] || 0) + 1; });
+  const sets = Object.keys(counts);
+  if (sets.length === 0){
+    $('arcSetBonuses').innerHTML = '<div class="note" style="margin-top:0">No set pieces selected yet.</div>';
+  } else {
+    $('arcSetBonuses').innerHTML = sets.map(setName => {
+      const c = counts[setName];
+      const tier = c >= 4 ? '4-piece' : (c >= 2 ? '2-piece' : null);
+      return `<div class="set-summary-row">
+        <div class="set-count-badge">${c}</div>
+        <div><div class="${tier ? 'set-active' : ''}" style="font-size:12.5px;font-weight:700">${setName}${tier ? ' — ' + tier + ' bonus active' : ' (need 2+ for a bonus)'}</div></div>
+      </div>`;
+    }).join('');
+  }
+}
+$('arcSetRef').innerHTML = Object.entries(SET_EFFECTS).map(([name, desc]) => `
+  <div class="tier-row"><div class="tier-badge tier-B" style="font-size:10px">SET</div>
+  <div><div class="tier-name">${name}</div><div class="tier-desc">${desc}</div></div></div>`).join('');
+renderArcDeck();
+
+// ---- Other: Patch Notes (best-effort auto-fetch via main process) ----
+$('checkPatchNotes').addEventListener('click', async () => {
+  const status = $('patchNotesStatus');
+  const results = $('patchNotesResults');
+  if (!window.api || !window.api.fetchPatchNotes){
+    status.textContent = 'Not available in this build.';
+    return;
+  }
+  status.textContent = 'Checking known sources…';
+  results.innerHTML = '';
+  try {
+    const res = await window.api.fetchPatchNotes();
+    if (!res.success){
+      status.textContent = 'No live feed found — none of the known sources currently publish a discoverable RSS/Atom feed. Use the links below instead.';
+      return;
+    }
+    const doc = new DOMParser().parseFromString(res.xml, 'application/xml');
+    if (doc.querySelector('parsererror')){
+      status.textContent = 'Found a feed at ' + res.source + ' but could not parse it. Use the links below instead.';
+      return;
+    }
+    let items = Array.from(doc.querySelectorAll('item'));
+    if (items.length === 0) items = Array.from(doc.querySelectorAll('entry'));
+    if (items.length === 0){
+      status.textContent = 'Found a feed at ' + res.source + ' but it had no entries. Use the links below instead.';
+      return;
+    }
+    status.textContent = 'Loaded ' + items.length + ' item(s) from ' + res.source;
+    results.innerHTML = items.slice(0, 10).map(item => {
+      const title = item.querySelector('title')?.textContent || '(untitled)';
+      let link = item.querySelector('link')?.textContent || item.querySelector('link')?.getAttribute('href') || '#';
+      const date = item.querySelector('pubDate')?.textContent || item.querySelector('updated')?.textContent || '';
+      return `<div class="tier-row"><div class="tier-badge tier-A" style="font-size:9px">NEW</div>
+        <div><div class="tier-name"><a href="${link}" target="_blank" rel="noopener">${title}</a></div><div class="tier-desc">${date}</div></div></div>`;
+    }).join('');
+  } catch (e) {
+    status.textContent = 'Error checking for updates: ' + e.message;
+  }
+});
+
+// ---- Other: Enhancement Cost Calculator ----
+let stageRows = [{stage:'', success:0, cost:0}];
+function renderStageRows(){
+  $('stageRows').innerHTML = stageRows.map((s, i) => `
+    <div class="stage-row" data-i="${i}">
+      <input data-f="stage" placeholder="e.g. +14 → +15" value="${(s.stage||'').replace(/"/g,'&quot;')}">
+      <input data-f="success" type="number" step="0.1" min="0" max="100" value="${s.success}">
+      <input data-f="cost" type="number" step="1" min="0" value="${s.cost}">
+      <button class="row-x" data-act="remove">✕</button>
+    </div>`).join('');
+  calcEnhancement();
+}
+$('stageRows').addEventListener('input', e => {
+  const row = e.target.closest('.stage-row'); if (!row) return;
+  const i = parseInt(row.dataset.i, 10);
+  const f = e.target.dataset.f;
+  if (f === 'stage') stageRows[i].stage = e.target.value;
+  if (f === 'success') stageRows[i].success = parseFloat(e.target.value) || 0;
+  if (f === 'cost') stageRows[i].cost = parseFloat(e.target.value) || 0;
+  calcEnhancement();
+});
+$('stageRows').addEventListener('click', e => {
+  const row = e.target.closest('.stage-row'); if (!row) return;
+  if (e.target.dataset.act === 'remove'){
+    stageRows.splice(parseInt(row.dataset.i, 10), 1);
+    renderStageRows();
+  }
+});
+$('addStageRow').addEventListener('click', () => { stageRows.push({stage:'', success:0, cost:0}); renderStageRows(); });
+function calcEnhancement(){
+  let totalAttempts = 0, totalCost = 0;
+  stageRows.forEach(s => {
+    if (s.success > 0){
+      const attempts = 100 / s.success;
+      totalAttempts += attempts;
+      totalCost += attempts * s.cost;
+    }
+  });
+  $('enhAttempts').textContent = totalAttempts.toFixed(1);
+  $('enhCost').textContent = fmt(totalCost);
+  $('enhStages').textContent = stageRows.length;
+}
+renderStageRows();
+
+// ---- Other: Crafting Profit Calculator ----
+let matRows = [{name:'', qty:1, cost:0}];
+function renderMatRows(){
+  $('matRows').innerHTML = matRows.map((m, i) => `
+    <div class="mat-row" data-i="${i}">
+      <input data-f="name" placeholder="Material name" value="${(m.name||'').replace(/"/g,'&quot;')}">
+      <input data-f="qty" type="number" step="1" min="0" value="${m.qty}">
+      <input data-f="cost" type="number" step="1" min="0" value="${m.cost}">
+      <button class="row-x" data-act="remove">✕</button>
+    </div>`).join('');
+  calcCraft();
+}
+$('matRows').addEventListener('input', e => {
+  const row = e.target.closest('.mat-row'); if (!row) return;
+  const i = parseInt(row.dataset.i, 10);
+  const f = e.target.dataset.f;
+  if (f === 'name') matRows[i].name = e.target.value;
+  if (f === 'qty') matRows[i].qty = parseFloat(e.target.value) || 0;
+  if (f === 'cost') matRows[i].cost = parseFloat(e.target.value) || 0;
+  calcCraft();
+});
+$('matRows').addEventListener('click', e => {
+  const row = e.target.closest('.mat-row'); if (!row) return;
+  if (e.target.dataset.act === 'remove'){
+    matRows.splice(parseInt(row.dataset.i, 10), 1);
+    renderMatRows();
+  }
+});
+$('addMatRow').addEventListener('click', () => { matRows.push({name:'', qty:1, cost:0}); renderMatRows(); });
+$('craftSale').addEventListener('input', calcCraft);
+$('craftFee').addEventListener('input', calcCraft);
+function calcCraft(){
+  const matCost = matRows.reduce((sum, m) => sum + m.qty * m.cost, 0);
+  const sale = parseFloat($('craftSale').value) || 0;
+  const fee = parseFloat($('craftFee').value) || 0;
+  const netSale = sale * (1 - fee / 100);
+  const profit = netSale - matCost;
+  const margin = sale > 0 ? (profit / sale * 100) : 0;
+  $('craftMatCost').textContent = fmt(matCost);
+  $('craftProfit').textContent = fmt(profit);
+  $('craftMargin').textContent = margin.toFixed(1) + '%';
+}
+renderMatRows();
+</script>
+</body>
+</html>
