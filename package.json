@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "Aion 2 Companion - a desktop toolkit for stat planning, combat power breakdown, and other Aion2 utilities",
   "main": "src/main.js",
-  "author": "StepTube",
-  "license": "MIT",
+  "author": "Aion 2 Community",
+  "license": "Unlicense",
   "scripts": {
     "start": "electron .",
     "dist": "electron-builder"
@@ -16,6 +16,7 @@
   "build": {
     "appId": "com.local.aion2companion",
     "productName": "Aion 2 Companion",
+    "copyright": "Public domain (Unlicense) - no rights reserved. Unofficial fan tool, not affiliated with NCSOFT.",
     "icon": "build/icon.png",
     "files": [
       "src/**/*"

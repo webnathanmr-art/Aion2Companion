@@ -82,3 +82,16 @@ npm run dist
 This uses `electron-builder` to produce a platform-native package (`.dmg` on
 macOS, `.exe`/NSIS installer or portable on Windows, `.AppImage` on Linux)
 under `release/`.
+
+## License
+
+**Public domain — no rights reserved** ([Unlicense](LICENSE)). Copy it, fork
+it, modify it, ship it, sell it; no attribution required.
+
+That dedication covers the code in this repository only. AION and AION 2,
+and all in-game names, terminology and systems referenced by this tool, are
+property of NCSOFT Corporation — this is an unofficial, non-commercial fan
+tool with no affiliation with or endorsement by NCSOFT. The damage model in
+the Damage Efficiency tab is an English translation of a calculator
+originally published by [StepTube](https://kjymm2.github.io/aion2damage/),
+and guide content is compiled from community sources cited in-app.
