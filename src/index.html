@@ -293,21 +293,37 @@
         <tr><td>Intelligence</td><td style="color:var(--muted)">(mapping not confirmed by sources)</td><td><input type="number" id="atInt" value="0" min="0"></td><td class="num" id="atIntOut">+0.00%</td></tr>
         <tr><td>Willpower</td><td style="color:var(--muted)">(mapping not confirmed by sources)</td><td><input type="number" id="atWill" value="0" min="0"></td><td class="num" id="atWillOut">+0.00%</td></tr>
         <tr><th style="padding-top:14px">Pantheon / Deity Stat (+0.20%/pt)</th><th style="padding-top:14px"></th><th style="padding-top:14px"></th><th style="padding-top:14px"></th></tr>
-        <tr><td>Justice (Nezekan)</td><td>Defense, Perfect proc rate</td><td><input type="number" id="atJustice" value="0" min="0"></td><td class="num" id="atJusticeOut">+0.00%</td></tr>
-        <tr><td>Freedom (Vaizel)</td><td>Accuracy, Evasion</td><td><input type="number" id="atFreedom" value="0" min="0"></td><td class="num" id="atFreedomOut">+0.00%</td></tr>
-        <tr><td>Illusion (Kaisinel)</td><td>Cooldown Reduction, Penetration</td><td><input type="number" id="atIllusion" value="0" min="0"></td><td class="num" id="atIllusionOut">+0.00%</td></tr>
-        <tr><td>Life (Yustiel)</td><td>Max HP, Regeneration proc rate</td><td><input type="number" id="atLife" value="0" min="0"></td><td class="num" id="atLifeOut">+0.00%</td></tr>
-        <tr><td>Time (Siel)</td><td>Attack Speed, Smite Resistance</td><td><input type="number" id="atTime" value="0" min="0"></td><td class="num" id="atTimeOut">+0.00%</td></tr>
-        <tr><td>Wisdom (Lumiel)</td><td>Smite proc rate</td><td><input type="number" id="atWisdom" value="0" min="0"></td><td class="num" id="atWisdomOut">+0.00%</td></tr>
-        <tr><td>Death <span style="color:var(--muted)">(name uncertain)</span></td><td style="color:var(--muted)">Critical (2nd stat unclear in sources)</td><td><input type="number" id="atDeath" value="0" min="0"></td><td class="num" id="atDeathOut">+0.00%</td></tr>
-        <tr><td>Destruction <span style="color:var(--muted)">(name uncertain)</span></td><td style="color:var(--muted)">Attack Power, Perfect Resistance</td><td><input type="number" id="atDestruction" value="0" min="0"></td><td class="num" id="atDestructionOut">+0.00%</td></tr>
-        <tr><td>Other 2 deity stats</td><td style="color:var(--muted)">(names/mappings not confirmed — same +0.20%/pt rate)</td><td><input type="number" id="atOtherDeity" value="0" min="0"></td><td class="num" id="atOtherDeityOut">+0.00%</td></tr>
+        <tr><td>Justice [Nezekan]</td><td>Defense, Perfect Chance</td><td><input type="number" id="atJustice" value="0" min="0"></td><td class="num" id="atJusticeOut">+0.00%</td></tr>
+        <tr><td>Destruction [Zikel]</td><td>Attack, Perfect Resist</td><td><input type="number" id="atDestruction" value="0" min="0"></td><td class="num" id="atDestructionOut">+0.00%</td></tr>
+        <tr><td>Freedom [Vaizel]</td><td>Accuracy, Evasion</td><td><input type="number" id="atFreedom" value="0" min="0"></td><td class="num" id="atFreedomOut">+0.00%</td></tr>
+        <tr><td>Death [Triniel]</td><td>Critical, Regen Penetration</td><td><input type="number" id="atDeath" value="0" min="0"></td><td class="num" id="atDeathOut">+0.00%</td></tr>
+        <tr><td>Illusion [Kaisinel]</td><td>−Cooldown, Endurance Penetration</td><td><input type="number" id="atIllusion" value="0" min="0"></td><td class="num" id="atIllusionOut">+0.00%</td></tr>
+        <tr><td>Wisdom [Lumiel]</td><td>Smite, −MP Cost</td><td><input type="number" id="atWisdom" value="0" min="0"></td><td class="num" id="atWisdomOut">+0.00%</td></tr>
+        <tr><td>Life [Yustiel]</td><td>HP, Regeneration</td><td><input type="number" id="atLife" value="0" min="0"></td><td class="num" id="atLifeOut">+0.00%</td></tr>
+        <tr><td>Destiny [Marchutan]</td><td>MP, Endurance</td><td><input type="number" id="atDestiny" value="0" min="0"></td><td class="num" id="atDestinyOut">+0.00%</td></tr>
+        <tr><td>Time [Siel]</td><td>Combat Speed, Smite Resist</td><td><input type="number" id="atTime" value="0" min="0"></td><td class="num" id="atTimeOut">+0.00%</td></tr>
+        <tr><td>Space [Israphel]</td><td>Move Speed, Block</td><td><input type="number" id="atSpace" value="0" min="0"></td><td class="num" id="atSpaceOut">+0.00%</td></tr>
       </table>
       <div class="note">
-        ※ Deity stats convert at double the rate of core attributes (0.20% vs 0.10% per point), so for raw derived-stat %, a deity point is worth 2× a core attribute point. 8 of the 10 Pantheon deity stats turned up with a stat mapping in research (2 with lower confidence, noted above); the remaining 2 are placeholders for whichever deity stats you're actually investing in.<br>
-        ※ Current community meta treats Time (Attack Speed) and Illusion (Cooldown Reduction) as the highest-priority Pantheon stats to invest in.<br>
+        ※ All 10 Pantheon deity stats are now listed with their confirmed mappings and official English names. Deity stats convert at double the rate of core attributes (0.20% vs 0.10% per point), so a deity point is worth 2× a core attribute point for raw derived-stat %.<br>
+        ※ <b>The conversion is perfectly linear — there are no diminishing returns on the attribute→stat step itself.</b> Worked example: Wisdom 178 → 178 × 0.2 = <b>+35.6% Smite</b>. Likewise ~10 Might ≈ +1% Attack.<br>
+        ※ Current community meta treats Time (Combat Speed) and Illusion (−Cooldown) as the highest-priority Pantheon stats to invest in.<br>
         ※ This table only converts attribute points into their derived-stat percentage — it does not attempt to output a single Combat Power number, since we have no confirmed formula linking derived-stat % to CP.
       </div>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <h2>Monoliths <span style="color:var(--muted);font-weight:400;font-size:12px">— Empyrean Trace pillars, a direct deity-stat (and therefore CP) source</span></h2>
+      <div class="note" style="margin-top:0">Every zone has a Monolith: an Empyrean Trace pillar you feed with traces collected in that zone to climb a level ladder. Each level costs a set number of tokens and pays out <b>deity stat and PvP stat gains</b> plus item rewards — which makes Monoliths one of the few systems that raises Combat Power directly through the Pantheon stats in the table above, rather than through gear.</div>
+      <table class="attr">
+        <tr><th>Zone</th><th>Added</th></tr>
+        <tr><td>Verteron</td><td class="num">Launch</td></tr>
+        <tr><td>Altgard</td><td class="num">Launch</td></tr>
+        <tr><td>Reshanta</td><td class="num">Launch</td></tr>
+        <tr><td>Eltnen (Elyos)</td><td class="num">Chapter 1</td></tr>
+        <tr><td>Morheim (Asmodian)</td><td class="num">Chapter 1</td></tr>
+      </table>
+      <div class="note">※ Regional Quests, Sealed Dungeons and Strongholds also reward an item granting Daevanion Skill points — a separate progression track worth doing alongside Monolith farming.</div>
     </div>
 
     <div class="grid" style="margin-top:18px">
@@ -350,12 +366,12 @@
 
   <div id="tab-arcana" class="tabpanel">
     <div class="callout" style="margin-top:0">
-      <b>⚠ Slot count is a moving target.</b> Aion2 has expanded the Arcana system more than once — sources describe 5 slots, then 6 after a "Scale (천칭)" piece was added, and you may be seeing more than that on your current client. Rather than hardcode a number we can't pin down with confidence, set it below to match what you actually see in-game. Set-effect numbers below are the best we could source, but several conflicted between guides (likely different patches) — treat them as directional, not exact.
+      <b>Arcana has expanded to 10 slots on the current KR/TW build.</b> The roster grew in stages: the original 5 (Chalice, Parchment, Compass, Bell, Mirror) → <b>Scales</b> → <b>Key + Hourglass</b> (July 1, 2026 "Chapter 1") → <b>Dice + Lantern</b> (August 12, 2026). The slot count below defaults to 10 to match that live build, but stays adjustable: Aion 2 Global (full launch October 5, 2026) is not guaranteed to ship with all 10 at once, so set it to whatever your client actually shows. Set-effect numbers are the best we could source and several conflicted between guides (likely different patches) — treat them as directional, not exact.
     </div>
     <div class="grid" style="margin-top:14px">
       <div class="card">
         <h2>Your Deck <span style="color:var(--muted);font-weight:400;font-size:12px">— grade + set per slot</span></h2>
-        <div class="field"><label>Number of Arcana slots</label><input type="number" id="arcSlotCount" value="6" min="1" max="12"></div>
+        <div class="field"><label>Number of Arcana slots <span style="font-size:10.5px">※ 10 on current KR/TW live</span></label><input type="number" id="arcSlotCount" value="10" min="1" max="12"></div>
         <div id="arcDeckRows" style="margin-top:10px"></div>
       </div>
       <div class="card2">
@@ -368,16 +384,23 @@
         <div class="note">※ Combat Power per grade is exact and confirmed (Common +20 · Rare +40 · Legendary +60 · Unique +80). Set-bonus text below activates once a set reaches 2 and 4 pieces in your deck — see the reference card for what each one reportedly does.</div>
       </div>
     </div>
-    <div class="card" style="margin-top:18px">
-      <h2>Set Effects Reference <span style="color:var(--muted);font-weight:400;font-size:12px">— as reported by Korean guides, confidence varies</span></h2>
-      <div id="arcSetRef"></div>
+    <div class="grid" style="margin-top:18px">
+      <div class="card">
+        <h2>What Each Slot Is For <span style="color:var(--muted);font-weight:400;font-size:12px">— card roles by slot type</span></h2>
+        <div id="arcSlotRoles"></div>
+        <div class="note">※ Beyond Combat Power, the main point of an Arcana deck is <b>raising skill levels</b> — cards push individual skills toward the level-20 goal that unlocks their full potential and specializations, alongside stats like cooldown reduction, HP, HP absorption and Combat Speed.</div>
+      </div>
+      <div class="card2">
+        <h2 class="r">Set Effects Reference <span style="color:var(--muted);font-weight:400;font-size:12px">— confidence varies</span></h2>
+        <div id="arcSetRef"></div>
+      </div>
     </div>
   </div>
   <!-- /tab-arcana -->
 
   <div id="tab-guides" class="tabpanel">
     <div class="callout" style="margin-top:0">
-      Compiled and translated from Korean dungeon guides (게임톡, Inven, NC Purple Lounge) and namu.wiki. Coverage is limited to the dungeons that turned up detailed, sourced mechanic write-ups — it's not a complete list of every dungeon in the game, and mechanic details can change with balance patches.
+      Compiled and translated from Korean dungeon guides (게임톡, Inven, NC Purple Lounge), namu.wiki, and English coverage of the Global build. <b>Content current as of the August 12, 2026 KR/TW build</b>; Aion 2 Global's full launch is October 5, 2026 and may not ship with every system listed here at once. Coverage is limited to content that turned up detailed, sourced write-ups — it's not a complete list of every dungeon in the game, and mechanics change with balance patches.
     </div>
     <div class="subtabs">
       <button class="subtab-btn active" data-subtab="dungeons">Dungeon Mechanics</button>
@@ -387,6 +410,16 @@
     <!-- Dungeon Mechanics -->
     <div id="sub-dungeons" class="subtabpanel active">
       <div class="card">
+        <h2>Latest Content: Chapter 1 — "Land of Sand and Frost" <span style="color:var(--muted);font-weight:400;font-size:12px">— July 1, 2026</span></h2>
+        <div class="tier-row"><div class="tier-badge tier-S">NEW</div><div><div class="tier-name">Brawler class</div><div class="tier-desc">Gauntlet-wielding front-line class built around rapid chain attacks and aggressive engages.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-A">CAP</div><div><div class="tier-name">Level cap 50 · Stigma cap 25</div><div class="tier-desc">Character level cap raised to 50; the Stigma skill reinforcement ceiling was adjusted to level 25.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-A">MAP</div><div><div class="tier-name">New regions: Eltnen (Elyos) & Morheim (Asmodian)</div><div class="tier-desc">Each brings its own Monolith, plus new Sealed Dungeons and Strongholds.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-B">SYS</div><div><div class="tier-name">Sealed Dungeons & Strongholds</div><div class="tier-desc">Repeatable reward content for endgame materials, experience and progression items; certain Regional Quests, Sealed Dungeons and Strongholds also grant Daevanion Skill points.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-B">GEAR</div><div><div class="tier-name">New Pendant slot · Hero-grade Amulets & Belts</div><div class="tier-desc">New accessory equipment added alongside the region content.</div></div></div>
+        <div class="note">※ A follow-up update on August 12, 2026 added the Dice and Lantern Arcana slots (see the Arcana Deck Simulator tab).</div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
         <h2>Transcendence (초월) Dungeons <span style="color:var(--muted);font-weight:400;font-size:12px">— 10-stage endgame content, difficulty scales per stage</span></h2>
         <div class="tier-row"><div class="tier-badge tier-S">01</div><div><div class="tier-name">Shattered Arcanis — Boss: Talisra</div><div class="tier-desc">Wipe-mechanic phases trigger at ~60% and ~30% HP. Blue and purple orbs spawn at the map edges and drift toward the boss; assign 2 players to each color <i>before</i> the pull. Collecting an orb grants a shield of that color — if everyone chases one color, the opposite shield never forms and the raid wipes.</div></div></div>
         <div class="tier-row"><div class="tier-badge tier-S">02</div><div><div class="tier-name">Deus Research Base — Boss: Artiel</div><div class="tier-desc">Fast-paced boss that mixes patterns quickly. At certain HP thresholds it destroys the map's outer edge, shrinking the arena and increasing hazard density; its knockback attacks can then knock you off the map. From stage 4 onward it alternates two contradictory chain mechanics — "You can't escape me" (move <i>away</i> from the boss) and "Bound in chains" (move <i>toward</i>/stick to the boss) — reading the callout correctly matters more than reflexes here.</div></div></div>
@@ -417,13 +450,19 @@
     <div id="sub-glossary" class="subtabpanel">
       <div class="card">
         <h2>Korean/Chinese ↔ English Term Glossary</h2>
-        <div class="note" style="margin-top:0">This app mixes translated English with the original Korean/Chinese terms throughout, since official English localization doesn't exist yet for most of these systems. Use this as a lookup when a term elsewhere in the app looks unfamiliar.</div>
+        <div class="note" style="margin-top:0">Terms below now use the <b>official English localization</b> where it's known (verified against Global-build stat names), with the Korean original alongside. Use this as a lookup when a term elsewhere in the app looks unfamiliar.</div>
         <table class="attr">
           <tr><th>Original</th><th>English Used In This App</th><th>Notes</th></tr>
           <tr><td>전투력</td><td>Combat Power</td><td>Official, server-computed gear-level score</td></tr>
           <tr><td>아툴 (Atool)</td><td>Atool</td><td>Community DPS-estimate score, distinct from Combat Power</td></tr>
-          <tr><td>강타</td><td>Smite</td><td>~2× damage proc</td></tr>
-          <tr><td>완벽</td><td>Perfect</td><td>Locks damage to weapon's max roll</td></tr>
+          <tr><td>강타</td><td>Smite</td><td>~2× damage proc. Official EN name; the game's internal name is "HardHit"</td></tr>
+          <tr><td>완벽</td><td>Perfect Chance / Perfect Resist</td><td>Locks damage to weapon's max roll; Resist is the defensive counterpart</td></tr>
+          <tr><td>전투 속도</td><td>Combat Speed</td><td>Official EN term (not "Attack Speed")</td></tr>
+          <tr><td>—</td><td>Regen Penetration / Endurance Penetration</td><td>Two distinct Penetration variants from Death and Illusion deity stats</td></tr>
+          <tr><td>—</td><td>Monolith / Empyrean Trace</td><td>Per-zone pillar fed with traces for deity &amp; PvP stat gains</td></tr>
+          <tr><td>—</td><td>Sealed Dungeon / Stronghold</td><td>Chapter 1 repeatable reward content</td></tr>
+          <tr><td>데바니온</td><td>Daevanion</td><td>Skill-point progression track</td></tr>
+          <tr><td>—</td><td>Brawler</td><td>Gauntlet class added in Chapter 1</td></tr>
           <tr><td>다단히트</td><td>Multi-Hit</td><td>Cascading extra-hit proc</td></tr>
           <tr><td>관통</td><td>Penetration</td><td></td></tr>
           <tr><td>명중</td><td>Accuracy</td><td>Avoids the Parry damage penalty</td></tr>
@@ -434,9 +473,11 @@
           <tr><td>각인</td><td>Engraving</td><td>Manastone/Godstone/Soul Engraving — see Itemization Pipeline in Combat Power tab</td></tr>
           <tr><td>영혼각인</td><td>Soul Engraving</td><td>Random substat on every gear piece</td></tr>
           <tr><td>신석각인</td><td>Godstone Engraving</td><td>On-hit CC proc effects</td></tr>
-          <tr><td>아르카나</td><td>Arcana</td><td>See the Arcana Deck Simulator tab</td></tr>
+          <tr><td>아르카나</td><td>Arcana</td><td>10 slots on current KR/TW live — see the Arcana Deck Simulator tab</td></tr>
+          <tr><td>활력 / 순수한 피 / 불굴</td><td>Vigor / Purity / Indomitability</td><td>Arcana set names — official EN differs from a literal translation</td></tr>
+          <tr><td>천칭</td><td>Scales (Libra)</td><td>The 6th Arcana slot, and the update that introduced it</td></tr>
           <tr><td>만신전</td><td>Pantheon</td><td>Deity-stat statue system</td></tr>
-          <tr><td>주신 / 신 스탯</td><td>Deity Stat</td><td>+0.20%/point conversion rate</td></tr>
+          <tr><td>주신 / 신 스탯</td><td>Deity Stat</td><td>+0.20%/point conversion rate, perfectly linear</td></tr>
           <tr><td>초월</td><td>Transcendence</td><td>10-stage endgame dungeon</td></tr>
           <tr><td>원정</td><td>Expedition</td><td>Multi-boss dungeon content</td></tr>
           <tr><td>정복 / 어려움 / 보통</td><td>Conquest / Hard / Normal</td><td>Expedition difficulty tiers</td></tr>
@@ -776,8 +817,8 @@ calcAccuracy();
 // ---- Combat Power: Attribute -> Derived Stat Planner (exact confirmed rates) ----
 const ATTR_MAP = [
   ['atMight', 0.10], ['atCon', 0.10], ['atDex', 0.10], ['atPre', 0.10], ['atInt', 0.10], ['atWill', 0.10],
-  ['atJustice', 0.20], ['atFreedom', 0.20], ['atIllusion', 0.20], ['atLife', 0.20], ['atTime', 0.20],
-  ['atWisdom', 0.20], ['atDeath', 0.20], ['atDestruction', 0.20], ['atOtherDeity', 0.20],
+  ['atJustice', 0.20], ['atDestruction', 0.20], ['atFreedom', 0.20], ['atDeath', 0.20], ['atIllusion', 0.20],
+  ['atWisdom', 0.20], ['atLife', 0.20], ['atDestiny', 0.20], ['atTime', 0.20], ['atSpace', 0.20],
 ];
 function calcAttrPlanner(){
   ATTR_MAP.forEach(([id, rate]) => {
@@ -981,17 +1022,28 @@ const ARCD_GRADES = [
   {v:60, label:'Legendary (+60)'},
   {v:80, label:'Unique (+80)'},
 ];
-const ARCD_SETS = ['None', 'Vitality (활력)', 'Magic (마력)', 'Frenzy (광분)', 'Pure Blood (순수한 피)', 'Punishment (징벌)', 'Guardian (수호)', 'Unyielding (불굴)'];
-const ARCD_SLOT_NAMES = ['Chalice (성배)', 'Parchment (양피지)', 'Compass (나침반)', 'Bell (종)', 'Mirror (거울)', 'Scale (천칭)'];
+const ARCD_SETS = ['None', 'Vigor (활력)', 'Magic (마력)', 'Frenzy (광분)', 'Purity (순수한 피)', 'Punishment (징벌)', 'Guardian (수호)', 'Indomitability (불굴)'];
+const ARCD_SLOT_NAMES = [
+  'Chalice (성배)', 'Parchment (양피지)', 'Compass (나침반)', 'Bell (종)', 'Mirror (거울)',
+  'Scales (천칭)', 'Key', 'Hourglass', 'Dice', 'Lantern'
+];
 const SET_EFFECTS = {
-  'Vitality (활력)': '2pc: reported to grant part of a PVE Attack bonus while HP ≥ 70%; 4pc: PVE Attack reported between +70 and +150 while HP ≥ 70% (sources disagree, likely a patch-to-patch buff) — currently considered the strongest all-around hunting/farming set.',
-  'Magic (마력)': 'Grants an important passive skill according to guides, but the specific stat effect was not clearly reported — often used as a 1-2 piece "point" investment alongside a 4pc Vitality base.',
+  'Vigor (활력)': '2pc: reported to grant part of a PVE Attack bonus while HP ≥ 70%; 4pc: PVE Attack reported between +70 and +150 while HP ≥ 70% (sources disagree, likely a patch-to-patch buff) — long considered the strongest all-around hunting/farming set.',
+  'Magic (마력)': 'Grants an important passive skill according to guides, but the specific stat effect was not clearly reported — often used as a 1-2 piece "point" investment alongside a 4pc Vigor base.',
   'Frenzy (광분)': '4pc: PVE Attack +50, Boss Damage Amp +5%, and Boss Damage Resistance +10% while HP ≤ 70%. Same Pantheon stats as Magic, reportedly stronger effect and cheaper to craft.',
-  'Pure Blood (순수한 피)': '4pc: PVE Defense +500, Critical Damage Amp +5%, and an extra Defense +1000 while HP ≤ 70%. Same Pantheon stats as Vitality, reportedly stronger effect and cheaper to craft.',
+  'Purity (순수한 피)': '4pc: PVE Defense +500, Critical Damage Amp +5%, and an extra Defense +1000 while HP ≤ 70%. Same Pantheon stats as Vigor, reportedly stronger effect and cheaper to craft.',
   'Punishment (징벌)': '2pc: Boss Damage Resistance; 4pc: PVE Attack Power up, plus a PVE damage increase while HP ≥ 70%. Reported as the top DPS-focused pick post-Season 3.',
   'Guardian (수호)': '2pc: Regeneration +5%; 4pc: Weapon Damage Amp +5%, plus a 5-second shield when HP drops to ≤ 30%.',
-  'Unyielding (불굴)': 'Reported effect (piece breakdown unclear): Weapon Damage Resistance +5%, Critical Damage Resistance +5%, and +50% PvP Damage Resistance for 5 seconds when afflicted by a status ailment (150s cooldown) — a PvP-defensive set.',
+  'Indomitability (불굴)': 'Reported effect (piece breakdown unclear): Weapon Damage Resist +5%, Critical Damage Resist +5%, and +50% PvP Damage Resist for 5 seconds when afflicted by a status ailment (150s cooldown) — a PvP-defensive set.',
 };
+const SLOT_ROLES = [
+  {name:'Chalice', desc:'The most flexible card type — boosts <b>both active and passive</b> skill levels.'},
+  {name:'Parchment & Compass', desc:'Focused on <b>active skills</b> and utility effects.'},
+  {name:'Bell & Mirror', desc:'Focused on <b>passive</b> skill enhancement.'},
+  {name:'Scales (Libra)', desc:'Added after the original five; the "Libra" update slot that started the current expansion wave.'},
+  {name:'Key & Hourglass', desc:'Added July 1, 2026. Broad <b>stat-based upgrades</b> that suit almost any build — guides advise farming and upgrading <b>Keys before Hourglasses</b> during Transcendence runs.'},
+  {name:'Dice & Lantern', desc:'Added August 12, 2026. Purely <b>offensive</b> options — Perfect hits, Critical hits, Multi-Hit and other damage-enhancing rolls.'},
+];
 let arcDeck = [];
 function ensureArcDeckSize(){
   const n = Math.max(1, Math.min(12, parseInt($('arcSlotCount').value, 10) || 6));
@@ -1045,6 +1097,9 @@ function calcArcDeck(){
 $('arcSetRef').innerHTML = Object.entries(SET_EFFECTS).map(([name, desc]) => `
   <div class="tier-row"><div class="tier-badge tier-B" style="font-size:10px">SET</div>
   <div><div class="tier-name">${name}</div><div class="tier-desc">${desc}</div></div></div>`).join('');
+$('arcSlotRoles').innerHTML = SLOT_ROLES.map(x => `
+  <div class="tier-row"><div class="tier-badge tier-A" style="font-size:9px">SLOT</div>
+  <div><div class="tier-name">${x.name}</div><div class="tier-desc">${x.desc}</div></div></div>`).join('');
 renderArcDeck();
 
 // ---- Other: Patch Notes (best-effort auto-fetch via main process) ----
