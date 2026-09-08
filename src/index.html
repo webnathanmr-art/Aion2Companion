@@ -9,11 +9,53 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
 <title>Aion 2 Companion</title>
 <style>
+  /* The bare :root below IS the Classic palette -- the app's original colours,
+     unchanged -- so [data-theme="classic"] needs no block of its own and an
+     unset attribute renders Classic too. [data-theme="dark"] is a separate,
+     more neutral dark; [data-theme="light"] flips the surfaces entirely.
+     Accent hues are darkened in light mode -- gold on white is unreadable at
+     the original value. --on-accent is the text colour that sits on top of a
+     gold fill, which changes with the theme. */
   :root{
-    --bg:#0e0e16; --card:#191926; --card2:#1f1f30; --line:#2e2e44;
-    --txt:#ededf5; --muted:#9a9ab2; --red:#e63950; --gold:#e0b45c;
+    --bg:#0e0e16; --card:#191926; --card2:#1f1f30; --inset:#15151f;
+    --input:#12121c; --hover:#1d1d2b; --line:#2e2e44;
+    --txt:#ededf5; --muted:#9a9ab2; --faint:#5c5c70;
+    --red:#e63950; --gold:#e0b45c; --purple:#a86fd8; --blue:#4a9de0; --green:#5fbf7f;
+    --red-fg:#ff5f75; --gold-fg:#e0b45c; --purple-fg:#c79bec; --blue-fg:#7fc0f0;
+    --on-accent:#0e0e16; --link:#8a8ac0;
+    --callout-bg:#241a1e; --callout-line:#4a2530;
+    --diag-fill:#1f1f30; --diag-gold-bg:#2a2418; --diag-purple-bg:#2a1f38;
+    --diag-green-bg:#2a2f22; --diag-red-bg:#3a1a2a;
+    --shadow:rgba(0,0,0,.45);
+    --tint:22%;
+  }
+  :root[data-theme="dark"]{
+    --bg:#14151c; --card:#1c1e27; --card2:#22242f; --inset:#191b23;
+    --input:#15171e; --hover:#242733; --line:#333747;
+    --txt:#e8eaf0; --muted:#9aa0b0; --faint:#5f6577;
+    --on-accent:#14151c;
+    --callout-bg:#241d20; --callout-line:#46282f;
+    --diag-fill:#22242f; --diag-gold-bg:#2a2519; --diag-purple-bg:#272238;
+    --diag-green-bg:#212a24; --diag-red-bg:#331d26;
+  }
+  :root[data-theme="light"]{
+    --bg:#f2f2f7; --card:#ffffff; --card2:#f7f7fb; --inset:#ececf3;
+    --input:#ffffff; --hover:#e9e9f2; --line:#d4d4e2;
+    --txt:#16161f; --muted:#55556b; --faint:#8b8ba3;
+    --red:#c22740; --gold:#8a6516; --purple:#6f35ad; --blue:#1f66a8; --green:#237a44;
+    --red-fg:#a81f36; --gold-fg:#6f5010; --purple-fg:#5c2b91; --blue-fg:#1a5688; --green-fg:#1c6337;
+    --on-accent:#ffffff; --link:#3a4bb0;
+    --callout-bg:#fdf0f2; --callout-line:#f0c8ce;
+    --diag-fill:#ffffff; --diag-gold-bg:#fbf3e0; --diag-purple-bg:#f4ecfb;
+    --diag-green-bg:#e9f6ed; --diag-red-bg:#fdeaee;
+    --shadow:rgba(20,20,40,.14);
+    --tint:14%;
   }
   *{margin:0;padding:0;box-sizing:border-box}
+  /* Several elements toggled with .hidden also carry a class that sets display
+     (.modal-overlay is flex, .field is flex), and a class selector outranks the
+     UA's [hidden] rule -- without this they stay visible when hidden is set. */
+  [hidden]{display:none!important}
   body{background:var(--bg);font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:var(--txt);min-height:100vh;padding:0 16px 60px}
   .wrap{max-width:1060px;margin:0 auto}
   .grid{display:grid;grid-template-columns:1fr 1.35fr;gap:18px;margin-top:22px}
@@ -24,26 +66,26 @@
   h2.r{color:var(--red)}
   .field{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:5px 0}
   .field label{font-size:12.5px;color:var(--muted);flex:1;line-height:1.35}
-  .field input{width:110px;background:#12121c;border:1px solid var(--line);border-radius:8px;color:var(--txt);font-size:14px;font-weight:700;padding:7px 10px;text-align:right;font-family:inherit}
+  .field input{width:110px;background:var(--input);border:1px solid var(--line);border-radius:8px;color:var(--txt);font-size:14px;font-weight:700;padding:7px 10px;text-align:right;font-family:inherit}
   .field input:focus{outline:none;border-color:var(--red)}
-  .field select{width:130px;background:#12121c;border:1px solid var(--line);border-radius:8px;color:var(--txt);font-size:13px;font-weight:700;padding:7px 8px;font-family:inherit}
+  .field select{width:130px;background:var(--input);border:1px solid var(--line);border-radius:8px;color:var(--txt);font-size:13px;font-weight:700;padding:7px 8px;font-family:inherit}
   .field select:focus{outline:none;border-color:var(--red)}
   .sect{margin-top:14px;padding-top:10px;border-top:1px dashed var(--line);font-size:11.5px;color:var(--muted);font-weight:700;letter-spacing:1px}
   /* results */
   .pockets{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
-  .pk{background:#15151f;border:1px solid var(--line);border-radius:10px;padding:10px 12px;text-align:center}
+  .pk{background:var(--inset);border:1px solid var(--line);border-radius:10px;padding:10px 12px;text-align:center}
   .pk .n{font-size:11px;color:var(--muted)}
   .pk .v{font-size:18px;font-weight:800;color:var(--gold);margin-top:3px}
   .pk .m{font-size:11px;color:var(--red);font-weight:700;margin-top:2px}
   .bar-row{display:flex;align-items:center;gap:12px;margin:9px 0}
   .bar-name{width:170px;font-size:13px;text-align:right;flex-shrink:0;line-height:1.25}
-  .bar-track{flex:1;height:28px;background:#15151f;border-radius:6px;position:relative;overflow:hidden}
+  .bar-track{flex:1;height:28px;background:var(--inset);border-radius:6px;position:relative;overflow:hidden}
   .bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:9px;font-size:12.5px;font-weight:700;min-width:2px;transition:width .25s}
   .bar-val{position:absolute;top:0;height:100%;display:flex;align-items:center;font-size:12.5px;font-weight:700;color:var(--gold);padding-left:8px}
   .divider{border-top:1px dashed var(--line);margin:12px 0}
   .note{font-size:11px;color:var(--muted);line-height:1.6;margin-top:12px}
   .mults{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
-  .mtag{background:#15151f;border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:11.5px;color:var(--muted)}
+  .mtag{background:var(--inset);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:11.5px;color:var(--muted)}
   .mtag b{color:var(--txt)}
   .warn{color:var(--red);font-size:12px;margin-top:8px;display:none}
   /* tabs */
@@ -55,70 +97,70 @@
   .tab-reset:hover{color:var(--red);border-color:var(--red)}
   .to-top{position:fixed;right:22px;bottom:22px;z-index:60;width:40px;height:40px;border-radius:50%;
     background:var(--card2);border:1px solid var(--line);color:var(--gold);font-size:16px;cursor:pointer;
-    display:none;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.45)}
+    display:none;align-items:center;justify-content:center;box-shadow:0 4px 14px var(--shadow)}
   .to-top:hover{border-color:var(--gold)}
   .to-top.show{display:flex}
   .tabpanel{display:none}
   .tabpanel.active{display:block}
   /* combat power tab */
-  .callout{background:#241a1e;border:1px solid #4a2530;border-radius:12px;padding:14px 16px;font-size:12px;color:var(--muted);line-height:1.7;margin-top:20px}
+  .callout{background:var(--callout-bg);border:1px solid var(--callout-line);border-radius:12px;padding:14px 16px;font-size:12px;color:var(--muted);line-height:1.7;margin-top:20px}
   .callout b{color:var(--txt)}
   .tier-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px dashed var(--line)}
   .tier-row:last-child{border-bottom:none}
   .tier-badge{flex-shrink:0;width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px}
-  .tier-S{background:#e6395033;color:#ff5f75;border:1px solid #e63950}
-  .tier-A{background:#e0b45c33;color:#e0b45c;border:1px solid #e0b45c}
-  .tier-B{background:#7a7a9633;color:#b9b9d0;border:1px solid #4a4a66}
-  .tier-C{background:#4a4a5c33;color:#8a8aa0;border:1px solid #3a3a4c}
+  .tier-S{background:color-mix(in srgb, var(--red) var(--tint), transparent);color:var(--red-fg);border:1px solid var(--red)}
+  .tier-A{background:color-mix(in srgb, var(--gold) var(--tint), transparent);color:var(--gold-fg);border:1px solid var(--gold)}
+  .tier-B{background:color-mix(in srgb, var(--muted) var(--tint), transparent);color:var(--txt);border:1px solid var(--muted)}
+  .tier-C{background:color-mix(in srgb, var(--faint) var(--tint), transparent);color:var(--muted);border:1px solid var(--faint)}
   .tier-name{font-weight:700;font-size:13.5px}
   .tier-desc{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.5}
   .arc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
-  .arc-slot{background:#15151f;border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center;display:flex;flex-direction:column;justify-content:space-between}
+  .arc-slot{background:var(--inset);border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center;display:flex;flex-direction:column;justify-content:space-between}
   .arc-slot .n{font-size:11px;color:var(--muted);margin-bottom:6px;line-height:1.35}
-  .arc-slot select,.arc-slot input{width:100%;background:#12121c;border:1px solid var(--line);border-radius:8px;color:var(--txt);font-size:12px;font-weight:700;padding:6px 4px;font-family:inherit;text-align:center}
+  .arc-slot select,.arc-slot input{width:100%;background:var(--input);border:1px solid var(--line);border-radius:8px;color:var(--txt);font-size:12px;font-weight:700;padding:6px 4px;font-family:inherit;text-align:center}
   .arcd-row{display:grid;grid-template-columns:1.1fr 1fr 1.3fr;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--line)}
   .arcd-row:last-child{border-bottom:none}
   .arcd-row .arcd-label{font-size:12px;font-weight:700;color:var(--muted)}
-  .arcd-row select{width:100%;background:#12121c;border:1px solid var(--line);border-radius:6px;color:var(--txt);font-size:12px;font-weight:700;padding:6px 6px;font-family:inherit}
+  .arcd-row select{width:100%;background:var(--input);border:1px solid var(--line);border-radius:6px;color:var(--txt);font-size:12px;font-weight:700;padding:6px 6px;font-family:inherit}
   .set-summary-row{display:flex;align-items:center;gap:10px;padding:6px 0}
-  .set-count-badge{flex-shrink:0;min-width:28px;height:24px;border-radius:6px;background:#15151f;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;color:var(--gold)}
+  .set-count-badge{flex-shrink:0;min-width:28px;height:24px;border-radius:6px;background:var(--inset);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;color:var(--gold)}
   .set-active{color:var(--red);font-weight:700}
   .refs{font-size:10.5px;color:var(--muted);line-height:1.9;margin-top:10px}
-  .refs a{color:#8a8ac0;text-decoration:none}
+  .refs a{color:var(--link);text-decoration:none}
   .refs a:hover{text-decoration:underline}
   table.attr{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
   table.attr th{text-align:left;color:var(--muted);font-weight:700;font-size:10.5px;letter-spacing:.5px;padding:4px 8px;border-bottom:1px solid var(--line)}
   table.attr td{padding:6px 8px;border-bottom:1px dashed var(--line)}
   table.attr td.num{text-align:right;font-weight:700;color:var(--gold)}
-  table.attr input{width:70px;background:#12121c;border:1px solid var(--line);border-radius:6px;color:var(--txt);font-size:12.5px;font-weight:700;padding:5px 8px;text-align:right;font-family:inherit}
+  table.attr input{width:70px;background:var(--input);border:1px solid var(--line);border-radius:6px;color:var(--txt);font-size:12.5px;font-weight:700;padding:5px 8px;text-align:right;font-family:inherit}
   /* other tab: subtabs */
   .subtabs{display:flex;gap:6px;flex-wrap:wrap;position:sticky;top:var(--tabsH,48px);z-index:40;background:var(--bg);padding:12px 16px;margin:0 -16px;border-bottom:1px solid var(--line)}
-  .subtab-btn{background:#15151f;border:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:12.5px;font-weight:700;padding:8px 14px;border-radius:999px;cursor:pointer}
+  .subtab-btn{background:var(--inset);border:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:12.5px;font-weight:700;padding:8px 14px;border-radius:999px;cursor:pointer}
   .subtab-btn:hover{color:var(--txt)}
-  .subtab-btn.active{color:#0e0e16;background:var(--gold);border-color:var(--gold)}
+  .subtab-btn.active{color:var(--on-accent);background:var(--gold);border-color:var(--gold)}
   .subtabpanel{display:none;margin-top:16px}
   .subtabpanel.active{display:block}
   .beta-badge{display:inline-block;background:var(--red);color:#fff;font-size:9px;font-weight:800;letter-spacing:.5px;padding:2px 6px;border-radius:999px;margin-left:6px;vertical-align:middle;position:relative;top:-1px}
   /* dungeon index */
   .dgn-controls{margin-bottom:14px}
-  .dgn-controls input[type=search]{width:100%;background:#12121c;border:1px solid var(--line);border-radius:10px;color:var(--txt);font-size:13.5px;font-family:inherit;padding:11px 14px}
+  .dgn-controls input[type=search]{width:100%;background:var(--input);border:1px solid var(--line);border-radius:10px;color:var(--txt);font-size:13.5px;font-family:inherit;padding:11px 14px}
   .dgn-controls input[type=search]:focus{outline:none;border-color:var(--red)}
   .dgn-filters{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-  .dgn-chip{background:#15151f;border:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:11.5px;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer}
+  .dgn-chip{background:var(--inset);border:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:11.5px;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer}
   .dgn-chip:hover{color:var(--txt)}
-  .dgn-chip.active{background:var(--gold);border-color:var(--gold);color:#0e0e16}
+  .dgn-chip.active{background:var(--gold);border-color:var(--gold);color:var(--on-accent)}
   .dgn-countrow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:9px}
   .dgn-count{font-size:11px;color:var(--muted)}
   .dgn-collapse{background:none;border:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;cursor:pointer}
   .dgn-collapse:hover{color:var(--gold);border-color:var(--gold)}
   .dgn{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden}
   .dgn-head{display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer;user-select:none}
-  .dgn-head:hover{background:#1d1d2b}
+  .dgn-head:hover{background:var(--hover)}
   .dgn-cat{flex-shrink:0;font-size:9px;font-weight:800;letter-spacing:.5px;padding:4px 8px;border-radius:5px;min-width:78px;text-align:center}
-  .cat-transcendence{background:#e6395033;color:#ff5f75;border:1px solid #e63950}
-  .cat-expedition{background:#e0b45c33;color:#e0b45c;border:1px solid #e0b45c}
-  .cat-raid{background:#a86fd833;color:#c79bec;border:1px solid #a86fd8}
-  .cat-solo{background:#4a9de033;color:#7fc0f0;border:1px solid #4a9de0}
+  .cat-transcendence{background:color-mix(in srgb, var(--red) var(--tint), transparent);color:var(--red-fg);border:1px solid var(--red)}
+  .cat-expedition{background:color-mix(in srgb, var(--gold) var(--tint), transparent);color:var(--gold-fg);border:1px solid var(--gold)}
+  .cat-raid{background:color-mix(in srgb, var(--purple) var(--tint), transparent);color:var(--purple-fg);border:1px solid var(--purple)}
+  .cat-solo{background:color-mix(in srgb, var(--blue) var(--tint), transparent);color:var(--blue-fg);border:1px solid var(--blue)}
   .dgn-title{flex:1;font-size:14px;font-weight:700}
   .dgn-sub{font-size:11px;color:var(--muted);font-weight:400;margin-top:2px}
   .dgn-arrow{color:var(--muted);font-size:11px;flex-shrink:0;transition:transform .18s}
@@ -126,7 +168,7 @@
   .dgn-body{display:none;padding:2px 16px 14px;border-top:1px solid var(--line)}
   .dgn.open .dgn-body{display:block}
   .dgn-empty{text-align:center;color:var(--muted);font-size:13px;padding:36px 12px}
-  .diagram{background:#12121c;border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:12px;overflow-x:auto}
+  .diagram{background:var(--input);border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:12px;overflow-x:auto}
   .diagram svg{display:block;max-width:100%;height:auto;margin:0 auto}
   .diagram .cap{font-size:11px;color:var(--muted);text-align:center;margin-top:8px;line-height:1.5}
   /* checklist */
@@ -137,26 +179,63 @@
   .chk-name{font-size:13px;font-weight:700}
   .chk-desc{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.5}
   .chk-reset{font-size:11px;color:var(--gold);margin-bottom:10px}
-  .progress-track{height:8px;background:#15151f;border-radius:4px;overflow:hidden;margin-top:8px}
+  .progress-track{height:8px;background:var(--inset);border-radius:4px;overflow:hidden;margin-top:8px}
   .progress-fill{height:100%;background:var(--red);border-radius:4px;transition:width .25s}
   /* boss timer */
   .boss-row{display:grid;grid-template-columns:1.4fr .8fr 1fr 1fr auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)}
   .boss-row:last-child{border-bottom:none}
-  .boss-row input{width:100%;background:#12121c;border:1px solid var(--line);border-radius:6px;color:var(--txt);font-size:12px;font-weight:700;padding:6px 8px;font-family:inherit}
+  .boss-row input{width:100%;background:var(--input);border:1px solid var(--line);border-radius:6px;color:var(--txt);font-size:12px;font-weight:700;padding:6px 8px;font-family:inherit}
   .boss-row .bname{font-size:12.5px;font-weight:700}
   .boss-countdown{font-size:12.5px;font-weight:800;color:var(--gold)}
   .boss-countdown.ready{color:var(--red)}
   .btn{background:var(--red);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-family:inherit;font-weight:700;font-size:12.5px;cursor:pointer}
   .btn:hover{opacity:.9}
-  .btn.ghost{background:#15151f;border:1px solid var(--line);color:var(--muted)}
+  .btn.ghost{background:var(--inset);border:1px solid var(--line);color:var(--muted)}
   .btn.small{padding:5px 10px;font-size:11px}
   .row-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px 8px}
   .row-x:hover{color:var(--red)}
   /* enhancement / crafting */
   .stage-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:center;padding:6px 0}
-  .stage-row input{width:100%;background:#12121c;border:1px solid var(--line);border-radius:6px;color:var(--txt);font-size:12.5px;font-weight:700;padding:6px 8px;text-align:right;font-family:inherit}
+  .stage-row input{width:100%;background:var(--input);border:1px solid var(--line);border-radius:6px;color:var(--txt);font-size:12.5px;font-weight:700;padding:6px 8px;text-align:right;font-family:inherit}
   .mat-row{display:grid;grid-template-columns:1.4fr 1fr 1fr auto;gap:8px;align-items:center;padding:6px 0}
-  .mat-row input{width:100%;background:#12121c;border:1px solid var(--line);border-radius:6px;color:var(--txt);font-size:12.5px;font-weight:700;padding:6px 8px;font-family:inherit}
+  .mat-row input{width:100%;background:var(--input);border:1px solid var(--line);border-radius:6px;color:var(--txt);font-size:12.5px;font-weight:700;padding:6px 8px;font-family:inherit}
+  /* settings modal */
+  .modal-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.55);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto}
+  .modal{background:var(--card);border:1px solid var(--line);border-radius:16px;width:100%;max-width:620px;box-shadow:0 18px 50px var(--shadow)}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line)}
+  .modal-head h2{color:var(--gold)}
+  .modal-body{padding:6px 20px 16px}
+  .modal-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;border-top:1px solid var(--line)}
+  .set-sect{margin-top:18px;margin-bottom:6px;padding-top:12px;border-top:1px dashed var(--line);font-size:11.5px;color:var(--gold);font-weight:800;letter-spacing:1px;text-transform:uppercase}
+  .set-sect:first-child{margin-top:4px;border-top:none;padding-top:0}
+  .modal input[type=text],.modal input[type=password],.modal input:not([type]){background:var(--input);border:1px solid var(--line);border-radius:8px;color:var(--txt);font-size:12.5px;font-weight:700;padding:7px 10px;font-family:inherit}
+  .modal input:focus,.modal select:focus{outline:none;border-color:var(--red)}
+  .modal select{background:var(--input);border:1px solid var(--line);border-radius:8px;color:var(--txt);font-size:12.5px;font-weight:700;padding:7px 8px;font-family:inherit;width:180px}
+  /* ai lookup */
+  .ai-presets{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+  .ai-preset{background:var(--inset);border:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:11.5px;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer;text-align:left}
+  .ai-preset:hover{color:var(--gold);border-color:var(--gold)}
+  #aiPrompt{width:100%;background:var(--input);border:1px solid var(--line);border-radius:10px;color:var(--txt);font-size:13px;font-family:inherit;padding:11px 14px;resize:vertical}
+  #aiPrompt:focus{outline:none;border-color:var(--red)}
+  .ai-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px}
+  .ai-meta{font-size:11px;color:var(--muted)}
+  .ai-warn{margin-top:12px;background:color-mix(in srgb, var(--red) var(--tint), transparent);border:1px solid var(--red);border-radius:10px;padding:10px 12px;font-size:11.5px;color:var(--txt);line-height:1.6}
+  .ai-result{margin-top:14px;background:var(--inset);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .ai-text{font-size:13px;line-height:1.7;white-space:pre-wrap;word-wrap:break-word}
+  .ai-sources{margin-top:12px;padding-top:10px;border-top:1px dashed var(--line);font-size:11px;line-height:1.9}
+  .ai-sources a{color:var(--link);text-decoration:none}
+  .ai-sources a:hover{text-decoration:underline}
+  .ai-stamp{font-size:10.5px;color:var(--faint);margin-top:10px}
+  .dgn-ask{background:none;border:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:999px;cursor:pointer;margin-top:10px}
+  .dgn-ask:hover{color:var(--gold);border-color:var(--gold)}
+  /* compact density */
+  :root[data-density="compact"] .card,:root[data-density="compact"] .card2{padding:13px 15px}
+  :root[data-density="compact"] .grid{gap:12px;margin-top:14px}
+  :root[data-density="compact"] .tier-row{padding:6px 0}
+  :root[data-density="compact"] .dgn-head{padding:9px 13px}
+  :root[data-density="compact"] .callout{padding:10px 13px;line-height:1.55}
+  :root[data-density="compact"] .field{padding:3px 0}
+  :root[data-density="compact"] body{padding-bottom:40px}
 </style>
 </head>
 <body>
@@ -167,9 +246,90 @@
     <button class="tab-btn" data-tab="arcana">Arcana Deck Simulator</button>
     <button class="tab-btn" data-tab="guides">Guides</button>
     <button class="tab-btn" data-tab="other">Other <span class="beta-badge">BETA</span></button>
-    <button id="clearSaved" class="tab-reset" title="Clear every value this app has saved on this computer">Reset saved data</button>
+    <button id="openSettings" class="tab-reset" title="Settings">⚙ Settings</button>
   </div>
   <button id="toTop" class="to-top" title="Back to top" aria-label="Back to top">↑</button>
+
+<div id="settingsOverlay" class="modal-overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="modal-head">
+      <h2 id="settingsTitle" style="margin:0">Settings</h2>
+      <button class="row-x" id="closeSettings" aria-label="Close settings">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="set-sect">Appearance</div>
+      <div class="field"><label>Theme</label>
+        <select id="setTheme"><option value="system">Match system</option><option value="classic">Classic (original)</option><option value="dark">Dark (neutral)</option><option value="light">Light</option></select>
+      </div>
+      <div class="field"><label>Density <span style="font-size:10.5px">※ compact fits more on screen</span></label>
+        <select id="setDensity"><option value="normal">Normal</option><option value="compact">Compact</option></select>
+      </div>
+      <div class="field"><label>Open on</label>
+        <select id="setStartup">
+          <option value="last">The tab I used last</option>
+          <option value="cp">Combat Power Breakdown</option>
+          <option value="damage">Damage Efficiency</option>
+          <option value="arcana">Arcana Deck Simulator</option>
+          <option value="guides">Guides</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      <div class="set-sect">Server &amp; timers</div>
+      <div class="field"><label>Server time zone <span style="font-size:10.5px">※ used by the Time Rift countdown</span></label>
+        <select id="setRegion">
+          <option value="tw">Taiwan (UTC+8)</option>
+          <option value="kr">Korea (UTC+9)</option>
+          <option value="utc">UTC</option>
+          <option value="local">My local time</option>
+        </select>
+      </div>
+      <div class="field"><label>Time Rift opening hours <span style="font-size:10.5px">※ comma-separated, server time</span></label>
+        <input id="setRiftHours" style="width:180px" placeholder="2,5,8,11,14,17,20,23">
+      </div>
+      <div class="note" style="margin-top:2px">The default hours are the Taiwan-server schedule our sources described. If your server differs, set them here rather than trusting ours.</div>
+
+      <div class="set-sect">AI Assistant <span class="beta-badge">BETA</span></div>
+      <div class="note" style="margin-top:0">Connects an AI model to look up guide information the app doesn't ship with. Answers are unverified and kept separate from the built-in guides. <b>Free options are marked FREE</b> and need no payment details.</div>
+      <div class="field"><label>Enable AI Lookup</label>
+        <select id="setAiEnabled"><option value="0">Off</option><option value="1">On</option></select>
+      </div>
+      <div class="field"><label>Provider</label>
+        <select id="setAiProvider" style="width:230px"></select>
+      </div>
+      <div class="note" id="setAiNote" style="margin-top:2px"></div>
+      <div class="field"><label>API key <span id="setKeyState" style="font-size:10.5px"></span></label>
+        <input id="setAiKey" type="password" style="width:230px" placeholder="Paste your key" autocomplete="off">
+      </div>
+      <div class="field" id="setBaseUrlRow" hidden><label>Base URL</label>
+        <input id="setAiBaseUrl" style="width:230px" placeholder="http://localhost:11434/v1">
+      </div>
+      <div class="field"><label>Model <span style="font-size:10.5px">※ blank uses the provider default</span></label>
+        <input id="setAiModel" style="width:230px" placeholder="">
+      </div>
+      <div class="field"><label>Use web search where supported</label>
+        <select id="setAiSearch"><option value="1">Yes (recommended)</option><option value="0">No</option></select>
+      </div>
+      <div class="ai-actions">
+        <button class="btn small ghost" id="setAiTest">Test connection</button>
+        <span class="ai-meta" id="setAiTestOut"></span>
+      </div>
+      <div class="note" id="setKeyStorage" style="margin-top:8px"></div>
+
+      <div class="set-sect">Data</div>
+      <div class="ai-actions">
+        <button class="btn small ghost" id="setOpenFolder">Open settings folder</button>
+        <button class="btn small ghost" id="setClearData" style="color:var(--red);border-color:var(--red)">Reset saved data</button>
+      </div>
+      <div class="note" style="margin-top:8px">Reset clears your stat inputs, Arcana deck, checklist progress, timers and calculator rows. It does not remove your AI settings or API key.</div>
+    </div>
+    <div class="modal-foot">
+      <span class="ai-meta" id="setSaved"></span>
+      <button class="btn" id="setDone">Done</button>
+    </div>
+  </div>
+</div>
 
   <div id="tab-damage" class="tabpanel">
   <div class="grid">
@@ -447,6 +607,7 @@
     </div>
     <div class="subtabs">
       <button class="subtab-btn active" data-subtab="dungeons">Dungeon Mechanics</button>
+      <button class="subtab-btn" data-subtab="ailookup">AI Lookup <span class="beta-badge">BETA</span></button>
       <button class="subtab-btn" data-subtab="classes">Classes</button>
       <button class="subtab-btn" data-subtab="progression">Progression</button>
       <button class="subtab-btn" data-subtab="pvp">PvP</button>
@@ -559,6 +720,35 @@
     </div>
 
     <!-- Term Glossary -->
+    <div id="sub-ailookup" class="subtabpanel">
+      <div class="callout" style="margin-top:0">
+        <b>This asks an AI model, not the app's own guides.</b> Everything below is
+        <b>unverified</b> and is never merged into the curated guide data — the two are kept
+        separate on purpose. Aion 2 patches often, so a model without live web search will
+        answer from stale training data and can state guesses as fact. Prefer a provider that
+        can search (Gemini and Claude can), check the sources it cites, and treat anything
+        uncited as a lead to confirm rather than an answer.
+      </div>
+      <div class="card" style="margin-top:14px">
+        <h2>Ask about Aion 2</h2>
+        <div id="aiOff" class="note" style="margin-top:0">
+          No AI provider is set up yet. Open <b>⚙ Settings → AI Assistant</b> to connect one —
+          there are free options that need no payment details.
+          <div style="margin-top:10px"><button class="btn small" id="aiGoSettings">Open Settings</button></div>
+        </div>
+        <div id="aiOn" hidden>
+          <div class="ai-presets" id="aiPresets"></div>
+          <textarea id="aiPrompt" rows="3" placeholder="e.g. What changed for Shattered Arcanis in the most recent Aion 2 patch?"></textarea>
+          <div class="ai-actions">
+            <button class="btn" id="aiAsk">Ask</button>
+            <span class="ai-meta" id="aiMeta"></span>
+          </div>
+          <div id="aiWarn" class="ai-warn" hidden></div>
+          <div id="aiResult" class="ai-result" hidden></div>
+        </div>
+      </div>
+    </div>
+
     <div id="sub-glossary" class="subtabpanel">
       <div class="card">
         <h2>Korean/Chinese ↔ English Term Glossary</h2>
@@ -631,7 +821,7 @@
           <div class="progress-track"><div class="progress-fill" id="dailyProgress" style="width:0%"></div></div>
           <div class="note">
             ※ We could not confirm an exact daily reset hour for the Taiwan server specifically (Korea's is 5:00 AM local, but regional publishers commonly set their own maintenance window) — set this to match what you observe in-game.<br>
-            <label style="color:var(--muted)">Daily/weekly reset hour, Taiwan time / UTC+8 (0-23): <input type="number" id="dailyResetHour" value="7" min="0" max="23" style="width:60px;background:#12121c;border:1px solid var(--line);border-radius:6px;color:var(--txt);padding:3px 6px;font-family:inherit"></label>
+            <label style="color:var(--muted)">Daily/weekly reset hour, Taiwan time / UTC+8 (0-23): <input type="number" id="dailyResetHour" value="7" min="0" max="23" style="width:60px;background:var(--input);border:1px solid var(--line);border-radius:6px;color:var(--txt);padding:3px 6px;font-family:inherit"></label>
           </div>
         </div>
         <div class="card2">
@@ -842,7 +1032,7 @@ function calc(){
   // +1%p efficiency
   const smiteCapped = (v.smite + v.sbuff) >= 100;
   const list = [
-    {name:'Front/Back Damage Amp', val: (b*0.01)/mRear*100, c:'#e63950'},
+    {name:'Front/Back Damage Amp', val: (b*0.01)/mRear*100, c:'var(--red)'},
     {name:'Smite', val: smiteCapped ? 0 : 0.01/mSmite*100, c:'#c8425a', tag: smiteCapped?'(proc rate at 100%)':''},
     {name:'Weapon Damage Amp', val: eff>0 ? (gear*0.01*onM)/eff*100 : 0, c:'#ad4b62'},
     {name:'Attack Increase Rate', val: 0.01/onM*100, c:'#8f5468'},
@@ -873,7 +1063,7 @@ function calc(){
       const val = eff>0 ? x.d/eff*100 : 0;
       const w = Math.max(val/fmax*60, 2);
       return `<div class="bar-row"><div class="bar-name">${x.name}</div>
-        <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:#e0b45c"></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:var(--gold)"></div>
         <span class="bar-val" style="left:${w}%">${pct(val)} <span style="color:var(--muted);font-weight:400;font-size:11px">&nbsp;effective +${x.d.toFixed(1)}</span></span></div></div>`;
     }).join('');
 
@@ -935,7 +1125,11 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => activateTab(btn.dataset.tab, true));
 });
 // Reopen on whatever tab you were last using, defaulting to Combat Power.
-activateTab(loadJSON(SK + 'activeTab', 'cp'), false) || activateTab('cp', false);
+const bootPrefs = loadJSON(SK + 'prefsMirror', {});
+const bootTab = (bootPrefs.startupTab && bootPrefs.startupTab !== 'last')
+  ? bootPrefs.startupTab
+  : loadJSON(SK + 'activeTab', 'cp');
+activateTab(bootTab, false) || activateTab('cp', false);
 
 // Ctrl/Cmd+1..5 jump between main tabs; Ctrl/Cmd+F focuses the dungeon search.
 document.addEventListener('keydown', e => {
@@ -952,12 +1146,262 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// ---- Reset every saved value (this app's keys only) ----
-$('clearSaved').addEventListener('click', () => {
-  if (!confirm('Clear everything this app has saved on this computer?\n\nThis wipes your saved stat inputs, Arcana deck, checklist progress, boss timers and calculator rows, then reloads the app.')) return;
+// ---- Settings ----------------------------------------------------------
+// Authoritative settings live in the main process (so the API key never
+// reaches this page). Appearance is additionally mirrored into localStorage so
+// the correct theme is painted on the very first frame instead of flashing
+// dark and then switching once the IPC round-trip returns.
+
+let SETTINGS = null;
+const SYS_DARK = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+
+function applyAppearance(theme, density){
+  const resolved = theme === 'system'
+    ? (SYS_DARK && SYS_DARK.matches === false ? 'light' : 'classic')
+    : theme;
+  document.documentElement.setAttribute('data-theme', resolved);
+  document.documentElement.setAttribute('data-density', density || 'normal');
+}
+(function bootAppearance(){
+  const m = loadJSON(SK + 'prefsMirror', {});
+  applyAppearance(m.theme || 'system', m.density || 'normal');
+  if (SYS_DARK && SYS_DARK.addEventListener){
+    SYS_DARK.addEventListener('change', () => {
+      const t = (SETTINGS && SETTINGS.theme) || loadJSON(SK + 'prefsMirror', {}).theme || 'system';
+      if (t === 'system') applyAppearance('system', document.documentElement.getAttribute('data-density'));
+    });
+  }
+})();
+
+const REGION_OFFSETS = { tw: 8*3600000, kr: 9*3600000, utc: 0, local: null };
+
+function applySettings(s){
+  SETTINGS = s;
+  applyAppearance(s.theme, s.density);
+  saveJSON(SK + 'prefsMirror', { theme: s.theme, density: s.density, startupTab: s.startupTab });
+
+  RIFT_OFFSET_MS = Object.prototype.hasOwnProperty.call(REGION_OFFSETS, s.region)
+    ? REGION_OFFSETS[s.region] : REGION_OFFSETS.tw;
+  const hrs = String(s.riftHours || '').split(',')
+    .map(x => parseInt(x.trim(), 10))
+    .filter(n => Number.isInteger(n) && n >= 0 && n <= 23);
+  RIFT_HOURS = hrs.length ? Array.from(new Set(hrs)).sort((a,b) => a-b) : RIFT_HOURS_DEFAULT.slice();
+  updateRiftTimer();
+
+  const on = !!(s.ai && s.ai.enabled);
+  $('aiOff').hidden = on;
+  $('aiOn').hidden = !on;
+  renderDgnList();   // the per-dungeon "Ask AI" buttons appear only when it is on
+}
+
+async function loadSettings(){
+  if (!window.api || !window.api.getSettings) return;
+  try { applySettings(await window.api.getSettings()); } catch(e) {}
+}
+
+async function saveSettings(patch){
+  if (!window.api || !window.api.setSettings) return;
+  try {
+    applySettings(await window.api.setSettings(patch));
+    const el = $('setSaved');
+    el.textContent = 'Saved';
+    clearTimeout(saveSettings._t);
+    saveSettings._t = setTimeout(() => { el.textContent = ''; }, 1600);
+  } catch(e) {}
+}
+
+// --- modal open/close ---
+function openSettings(){
+  if (!SETTINGS){ alert('Settings are still loading.'); return; }
+  fillSettingsForm();
+  $('settingsOverlay').hidden = false;
+  $('setTheme').focus();
+}
+function closeSettings(){ $('settingsOverlay').hidden = true; $('setAiKey').value = ''; }
+$('openSettings').addEventListener('click', openSettings);
+$('closeSettings').addEventListener('click', closeSettings);
+$('setDone').addEventListener('click', closeSettings);
+$('settingsOverlay').addEventListener('click', e => { if (e.target === $('settingsOverlay')) closeSettings(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !$('settingsOverlay').hidden) closeSettings();
+});
+
+function providerById(id){ return ((SETTINGS && SETTINGS.providers) || []).find(p => p.id === id) || null; }
+
+function fillSettingsForm(){
+  const s = SETTINGS;
+  $('setTheme').value = s.theme;
+  $('setDensity').value = s.density;
+  $('setStartup').value = s.startupTab;
+  $('setRegion').value = Object.prototype.hasOwnProperty.call(REGION_OFFSETS, s.region) ? s.region : 'tw';
+  $('setRiftHours').value = s.riftHours || RIFT_HOURS_DEFAULT.join(',');
+
+  const sel = $('setAiProvider');
+  sel.innerHTML = (s.providers || []).map(p =>
+    `<option value="${p.id}">${p.label}${p.free ? ' — FREE' : ''}</option>`).join('');
+  sel.value = (s.ai && s.ai.provider) || 'gemini';
+  $('setAiEnabled').value = s.ai && s.ai.enabled ? '1' : '0';
+  $('setAiModel').value = (s.ai && s.ai.model) || '';
+  $('setAiBaseUrl').value = (s.ai && s.ai.baseUrl) || '';
+  $('setAiSearch').value = s.ai && s.ai.requireSearch === false ? '0' : '1';
+  $('setKeyStorage').textContent = s.encryptionAvailable
+    ? 'Your key is encrypted at rest using your operating system’s secure storage, and is never sent anywhere except the provider you chose.'
+    : 'Your OS did not offer encrypted storage, so the key is saved as plain text in the settings folder. It is still never sent anywhere except the provider you chose.';
+  syncProviderUI();
+}
+
+function syncProviderUI(){
+  const p = providerById($('setAiProvider').value);
+  if (!p) return;
+  const s = SETTINGS;
+  // Some provider notes already spell out the no-search caveat; don't repeat it.
+  const saysSearch = /search/i.test(p.note);
+  $('setAiNote').textContent = p.note +
+    (p.search || saysSearch ? '' : ' It cannot search the web, so it will not know about recent patches.');
+  $('setBaseUrlRow').hidden = !(p.id === 'custom' || p.id === 'ollama');
+  $('setAiModel').placeholder = p.defaultModel || 'model name';
+  $('setAiKey').disabled = !p.needsKey;
+  $('setAiKey').placeholder = p.needsKey ? 'Paste your key' : 'Not needed for a local model';
+  const sameProvider = s.ai && s.ai.provider === p.id;
+  $('setKeyState').textContent = !p.needsKey ? ''
+    : (s.apiKeySet && sameProvider ? '— saved (' + s.apiKeyHint + '), leave blank to keep' : '— not set');
+}
+$('setAiProvider').addEventListener('change', () => {
+  const p = providerById($('setAiProvider').value);
+  saveSettings({ ai: { ...(SETTINGS.ai||{}), provider: $('setAiProvider').value,
+                       baseUrl: p && p.id === 'ollama' ? 'http://localhost:11434/v1' : '' } })
+    .then(() => { $('setAiBaseUrl').value = (SETTINGS.ai && SETTINGS.ai.baseUrl) || ''; syncProviderUI(); });
+});
+
+$('setTheme').addEventListener('change', () => saveSettings({ theme: $('setTheme').value }));
+$('setDensity').addEventListener('change', () => saveSettings({ density: $('setDensity').value }));
+$('setStartup').addEventListener('change', () => saveSettings({ startupTab: $('setStartup').value }));
+$('setRegion').addEventListener('change', () => saveSettings({ region: $('setRegion').value }));
+$('setRiftHours').addEventListener('change', () => saveSettings({ riftHours: $('setRiftHours').value }));
+$('setAiEnabled').addEventListener('change', () => saveSettings({ ai: { ...(SETTINGS.ai||{}), enabled: $('setAiEnabled').value === '1' } }));
+$('setAiModel').addEventListener('change', () => saveSettings({ ai: { ...(SETTINGS.ai||{}), model: $('setAiModel').value.trim() } }));
+$('setAiBaseUrl').addEventListener('change', () => saveSettings({ ai: { ...(SETTINGS.ai||{}), baseUrl: $('setAiBaseUrl').value.trim() } }));
+$('setAiSearch').addEventListener('change', () => saveSettings({ ai: { ...(SETTINGS.ai||{}), requireSearch: $('setAiSearch').value === '1' } }));
+$('setAiKey').addEventListener('change', async () => {
+  const v = $('setAiKey').value;
+  if (!v) return;                       // blank means "keep what's saved"
+  await saveSettings({ apiKey: v.trim() });
+  $('setAiKey').value = '';
+  syncProviderUI();
+});
+
+$('setAiTest').addEventListener('click', async () => {
+  const out = $('setAiTestOut');
+  out.textContent = 'Testing…';
+  if ($('setAiKey').value.trim()) await saveSettings({ apiKey: $('setAiKey').value.trim() });
+  $('setAiKey').value = '';
+  const r = await window.api.aiTest();
+  out.textContent = r.success
+    ? '✓ Connected to ' + r.provider + (r.model ? ' (' + r.model + ')' : '')
+    : '✕ ' + r.error;
+  syncProviderUI();
+});
+
+$('setOpenFolder').addEventListener('click', () => window.api.openSettingsFolder());
+$('setClearData').addEventListener('click', () => {
+  if (!confirm('Clear everything this app has saved on this computer?\n\nThis wipes your saved stat inputs, Arcana deck, checklist progress, boss timers and calculator rows, then reloads the app. Your AI settings and API key are not affected.')) return;
   try { Object.keys(localStorage).filter(k => k.startsWith(SK)).forEach(k => localStorage.removeItem(k)); } catch(e) {}
   location.reload();
 });
+
+// ---- AI Lookup ---------------------------------------------------------
+const AI_PRESETS = [
+  'What changed in the most recent Aion 2 patch?',
+  'Which stats give the most Combat Power in the current Aion 2 build?',
+  'What are the current Arcana set bonuses in Aion 2?',
+  'Which Aion 2 dungeons were added or reworked most recently?'
+];
+$('aiPresets').innerHTML = AI_PRESETS.map(q =>
+  `<button class="ai-preset" type="button">${q.replace(/</g,'&lt;')}</button>`).join('');
+$('aiPresets').addEventListener('click', e => {
+  const b = e.target.closest('.ai-preset'); if (!b) return;
+  $('aiPrompt').value = b.textContent;
+  askAI();
+});
+$('aiGoSettings').addEventListener('click', openSettings);
+$('aiAsk').addEventListener('click', askAI);
+$('aiPrompt').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) askAI();
+});
+
+let aiBusy = false;
+async function askAI(){
+  const q = $('aiPrompt').value.trim();
+  if (!q || aiBusy) return;
+  aiBusy = true;
+  $('aiAsk').disabled = true;
+  $('aiMeta').textContent = 'Asking…';
+  $('aiWarn').hidden = true;
+  $('aiResult').hidden = true;
+
+  const r = await window.api.aiAsk(q);
+  aiBusy = false;
+  $('aiAsk').disabled = false;
+
+  if (!r.success){
+    $('aiMeta').textContent = '';
+    $('aiWarn').hidden = false;
+    $('aiWarn').textContent = 'That request failed: ' + r.error;
+    return;
+  }
+
+  $('aiMeta').textContent = r.provider + (r.model ? ' · ' + r.model : '');
+
+  // Model output is untrusted text: build the result with DOM APIs only.
+  const res = $('aiResult');
+  res.textContent = '';
+  const body = document.createElement('div');
+  body.className = 'ai-text';
+  body.textContent = r.text;
+  res.appendChild(body);
+
+  if (r.sources.length){
+    const src = document.createElement('div');
+    src.className = 'ai-sources';
+    const lbl = document.createElement('b');
+    lbl.textContent = 'Sources the model cited:';
+    src.appendChild(lbl);
+    r.sources.slice(0, 8).forEach(item => {
+      const href = safeHttpUrl(item.url);
+      src.appendChild(document.createElement('br'));
+      if (href){
+        const a = document.createElement('a');
+        a.href = href; a.target = '_blank'; a.rel = 'noopener noreferrer';
+        a.textContent = item.title || href;
+        src.appendChild(a);
+      } else {
+        src.appendChild(document.createTextNode(item.title || ''));
+      }
+    });
+    res.appendChild(src);
+  }
+
+  const stamp = document.createElement('div');
+  stamp.className = 'ai-stamp';
+  stamp.textContent = r.sources.length
+    ? 'Unverified AI output, grounded in the sources above — confirm before relying on it.'
+    : (r.canSearch
+        ? 'Unverified AI output with no sources cited — the model may be answering from memory. Treat this as a lead, not a fact.'
+        : 'Unverified AI output. This provider cannot search the web, so this comes from training data that predates the current patch.');
+  res.appendChild(stamp);
+  res.hidden = false;
+}
+
+// Per-dungeon shortcut: prefill and run a question about that instance.
+$('dgnList').addEventListener('click', e => {
+  const b = e.target.closest('.dgn-ask'); if (!b) return;
+  e.stopPropagation();
+  activateSubtab($('tab-guides'), 'ailookup', true);
+  $('aiPrompt').value = `In the MMO Aion 2, what are the current boss mechanics for the instance "${b.dataset.name}", and did the most recent patch change them?`;
+  askAI();
+});
+
+loadSettings();
 
 // ---- Combat Power: Arcana (exact, fixed per-grade values) ----
 // Counted by grade rather than by slot: the per-card Combat Power is confirmed,
@@ -1051,95 +1495,95 @@ calcAttrPlanner();
 // Diagrams are original inline SVG, keyed by id and injected into a dungeon's body.
 const DGN_DIAGRAMS = {
   arcanis: `<div class="diagram"><svg viewBox="0 0 640 210" role="img" aria-label="Shattered Arcanis orb and shield assignment diagram">
-    <text x="160" y="18" text-anchor="middle" fill="#e0b45c" font-size="12" font-weight="700" font-family="sans-serif">CORRECT — 2 per colour</text>
-    <text x="480" y="18" text-anchor="middle" fill="#e63950" font-size="12" font-weight="700" font-family="sans-serif">WIPE — everyone stacks one colour</text>
-    <line x1="320" y1="28" x2="320" y2="200" stroke="#2e2e44" stroke-width="1" stroke-dasharray="4 4"/>
-    <circle cx="160" cy="115" r="66" fill="none" stroke="#2e2e44" stroke-width="1.5"/>
-    <circle cx="160" cy="115" r="20" fill="#1f1f30" stroke="#9a9ab2" stroke-width="1.5"/>
-    <text x="160" y="119" text-anchor="middle" fill="#ededf5" font-size="10" font-family="sans-serif">BOSS</text>
-    <circle cx="110" cy="75" r="9" fill="#4a9de0"/><circle cx="130" cy="60" r="9" fill="#4a9de0"/>
-    <circle cx="190" cy="60" r="9" fill="#a86fd8"/><circle cx="210" cy="75" r="9" fill="#a86fd8"/>
-    <path d="M118 88 L140 104" stroke="#4a9de0" stroke-width="1.5" marker-end="url(#dah)"/>
-    <path d="M202 88 L180 104" stroke="#a86fd8" stroke-width="1.5" marker-end="url(#dah)"/>
-    <text x="160" y="196" text-anchor="middle" fill="#9a9ab2" font-size="10" font-family="sans-serif">both shields form → survive</text>
-    <circle cx="480" cy="115" r="66" fill="none" stroke="#2e2e44" stroke-width="1.5"/>
-    <circle cx="480" cy="115" r="20" fill="#1f1f30" stroke="#9a9ab2" stroke-width="1.5"/>
-    <text x="480" y="119" text-anchor="middle" fill="#ededf5" font-size="10" font-family="sans-serif">BOSS</text>
-    <circle cx="430" cy="75" r="9" fill="#4a9de0"/><circle cx="450" cy="60" r="9" fill="#4a9de0"/>
-    <circle cx="510" cy="60" r="9" fill="#4a9de0"/><circle cx="530" cy="75" r="9" fill="#4a9de0"/>
-    <text x="480" y="150" text-anchor="middle" fill="#e63950" font-size="22" font-weight="800" font-family="sans-serif">✕</text>
-    <text x="480" y="196" text-anchor="middle" fill="#e63950" font-size="10" font-family="sans-serif">purple shield never forms → raid wipes</text>
-    <defs><marker id="dah" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#9a9ab2"/></marker></defs>
+    <text x="160" y="18" text-anchor="middle" fill="var(--gold)" font-size="12" font-weight="700" font-family="sans-serif">CORRECT — 2 per colour</text>
+    <text x="480" y="18" text-anchor="middle" fill="var(--red)" font-size="12" font-weight="700" font-family="sans-serif">WIPE — everyone stacks one colour</text>
+    <line x1="320" y1="28" x2="320" y2="200" stroke="var(--line)" stroke-width="1" stroke-dasharray="4 4"/>
+    <circle cx="160" cy="115" r="66" fill="none" stroke="var(--line)" stroke-width="1.5"/>
+    <circle cx="160" cy="115" r="20" fill="var(--diag-fill)" stroke="var(--muted)" stroke-width="1.5"/>
+    <text x="160" y="119" text-anchor="middle" fill="var(--txt)" font-size="10" font-family="sans-serif">BOSS</text>
+    <circle cx="110" cy="75" r="9" fill="var(--blue)"/><circle cx="130" cy="60" r="9" fill="var(--blue)"/>
+    <circle cx="190" cy="60" r="9" fill="var(--purple)"/><circle cx="210" cy="75" r="9" fill="var(--purple)"/>
+    <path d="M118 88 L140 104" stroke="var(--blue)" stroke-width="1.5" marker-end="url(#dah)"/>
+    <path d="M202 88 L180 104" stroke="var(--purple)" stroke-width="1.5" marker-end="url(#dah)"/>
+    <text x="160" y="196" text-anchor="middle" fill="var(--muted)" font-size="10" font-family="sans-serif">both shields form → survive</text>
+    <circle cx="480" cy="115" r="66" fill="none" stroke="var(--line)" stroke-width="1.5"/>
+    <circle cx="480" cy="115" r="20" fill="var(--diag-fill)" stroke="var(--muted)" stroke-width="1.5"/>
+    <text x="480" y="119" text-anchor="middle" fill="var(--txt)" font-size="10" font-family="sans-serif">BOSS</text>
+    <circle cx="430" cy="75" r="9" fill="var(--blue)"/><circle cx="450" cy="60" r="9" fill="var(--blue)"/>
+    <circle cx="510" cy="60" r="9" fill="var(--blue)"/><circle cx="530" cy="75" r="9" fill="var(--blue)"/>
+    <text x="480" y="150" text-anchor="middle" fill="var(--red)" font-size="22" font-weight="800" font-family="sans-serif">✕</text>
+    <text x="480" y="196" text-anchor="middle" fill="var(--red)" font-size="10" font-family="sans-serif">purple shield never forms → raid wipes</text>
+    <defs><marker id="dah" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="var(--muted)"/></marker></defs>
   </svg><div class="cap"><b>Orb / shield split:</b> assign 2 players to blue and 2 to purple <i>before</i> the pull. Orbs drift inward from the map edge; each collected orb raises a shield of that colour.</div></div>`,
 
   chains: `<div class="diagram"><svg viewBox="0 0 640 190" role="img" aria-label="Deus Research Base chain callout diagram">
-    <text x="160" y="18" text-anchor="middle" fill="#ededf5" font-size="12" font-weight="700" font-family="sans-serif">"You can't escape me"</text>
-    <text x="160" y="34" text-anchor="middle" fill="#e0b45c" font-size="11" font-weight="700" font-family="sans-serif">RUN AWAY →</text>
-    <circle cx="160" cy="105" r="22" fill="#1f1f30" stroke="#e63950" stroke-width="1.5"/>
-    <text x="160" y="109" text-anchor="middle" fill="#ededf5" font-size="10" font-family="sans-serif">BOSS</text>
-    <path d="M186 105 L246 105" stroke="#e0b45c" stroke-width="2" marker-end="url(#dah2)"/>
-    <path d="M134 105 L74 105" stroke="#e0b45c" stroke-width="2" marker-end="url(#dah2)"/>
-    <circle cx="258" cy="105" r="8" fill="#4a9de0"/><circle cx="62" cy="105" r="8" fill="#4a9de0"/>
-    <line x1="320" y1="10" x2="320" y2="180" stroke="#2e2e44" stroke-width="1" stroke-dasharray="4 4"/>
-    <text x="480" y="18" text-anchor="middle" fill="#ededf5" font-size="12" font-weight="700" font-family="sans-serif">"Bound in chains"</text>
-    <text x="480" y="34" text-anchor="middle" fill="#e0b45c" font-size="11" font-weight="700" font-family="sans-serif">← STACK ON BOSS</text>
-    <circle cx="480" cy="105" r="22" fill="#1f1f30" stroke="#e63950" stroke-width="1.5"/>
-    <text x="480" y="109" text-anchor="middle" fill="#ededf5" font-size="10" font-family="sans-serif">BOSS</text>
-    <path d="M566 105 L512 105" stroke="#e0b45c" stroke-width="2" marker-end="url(#dah2)"/>
-    <path d="M394 105 L448 105" stroke="#e0b45c" stroke-width="2" marker-end="url(#dah2)"/>
-    <circle cx="578" cy="105" r="8" fill="#4a9de0"/><circle cx="382" cy="105" r="8" fill="#4a9de0"/>
-    <text x="320" y="176" text-anchor="middle" fill="#9a9ab2" font-size="10" font-family="sans-serif">Stage 4+ alternates both — read the callout, don't guess</text>
-    <defs><marker id="dah2" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#e0b45c"/></marker></defs>
+    <text x="160" y="18" text-anchor="middle" fill="var(--txt)" font-size="12" font-weight="700" font-family="sans-serif">"You can't escape me"</text>
+    <text x="160" y="34" text-anchor="middle" fill="var(--gold)" font-size="11" font-weight="700" font-family="sans-serif">RUN AWAY →</text>
+    <circle cx="160" cy="105" r="22" fill="var(--diag-fill)" stroke="var(--red)" stroke-width="1.5"/>
+    <text x="160" y="109" text-anchor="middle" fill="var(--txt)" font-size="10" font-family="sans-serif">BOSS</text>
+    <path d="M186 105 L246 105" stroke="var(--gold)" stroke-width="2" marker-end="url(#dah2)"/>
+    <path d="M134 105 L74 105" stroke="var(--gold)" stroke-width="2" marker-end="url(#dah2)"/>
+    <circle cx="258" cy="105" r="8" fill="var(--blue)"/><circle cx="62" cy="105" r="8" fill="var(--blue)"/>
+    <line x1="320" y1="10" x2="320" y2="180" stroke="var(--line)" stroke-width="1" stroke-dasharray="4 4"/>
+    <text x="480" y="18" text-anchor="middle" fill="var(--txt)" font-size="12" font-weight="700" font-family="sans-serif">"Bound in chains"</text>
+    <text x="480" y="34" text-anchor="middle" fill="var(--gold)" font-size="11" font-weight="700" font-family="sans-serif">← STACK ON BOSS</text>
+    <circle cx="480" cy="105" r="22" fill="var(--diag-fill)" stroke="var(--red)" stroke-width="1.5"/>
+    <text x="480" y="109" text-anchor="middle" fill="var(--txt)" font-size="10" font-family="sans-serif">BOSS</text>
+    <path d="M566 105 L512 105" stroke="var(--gold)" stroke-width="2" marker-end="url(#dah2)"/>
+    <path d="M394 105 L448 105" stroke="var(--gold)" stroke-width="2" marker-end="url(#dah2)"/>
+    <circle cx="578" cy="105" r="8" fill="var(--blue)"/><circle cx="382" cy="105" r="8" fill="var(--blue)"/>
+    <text x="320" y="176" text-anchor="middle" fill="var(--muted)" font-size="10" font-family="sans-serif">Stage 4+ alternates both — read the callout, don't guess</text>
+    <defs><marker id="dah2" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="var(--gold)"/></marker></defs>
   </svg><div class="cap"><b>Opposing chain callouts:</b> two names that demand opposite reactions. The arena also shrinks at HP thresholds, so knockbacks near the edge turn lethal.</div></div>`,
 
   tombstone: `<div class="diagram"><svg viewBox="0 0 640 200" role="img" aria-label="Tombstone colour-matching diagram">
-    <text x="320" y="18" text-anchor="middle" fill="#e0b45c" font-size="12" font-weight="700" font-family="sans-serif">Boss glows a colour → line up behind the MATCHING tombstone</text>
-    <rect x="290" y="40" width="60" height="34" rx="6" fill="#1f1f30" stroke="#a86fd8" stroke-width="2"/>
-    <text x="320" y="62" text-anchor="middle" fill="#a86fd8" font-size="11" font-weight="700" font-family="sans-serif">BOSS</text>
-    <text x="320" y="90" text-anchor="middle" fill="#a86fd8" font-size="10" font-family="sans-serif">cue: purple</text>
-    <rect x="90" y="120" width="46" height="56" rx="4" fill="#1f1f30" stroke="#4a9de0" stroke-width="2"/>
-    <text x="113" y="152" text-anchor="middle" fill="#4a9de0" font-size="10" font-family="sans-serif">blue</text>
-    <rect x="297" y="120" width="46" height="56" rx="4" fill="#2a1f38" stroke="#a86fd8" stroke-width="2.5"/>
-    <text x="320" y="152" text-anchor="middle" fill="#a86fd8" font-size="10" font-weight="700" font-family="sans-serif">purple</text>
-    <rect x="504" y="120" width="46" height="56" rx="4" fill="#1f1f30" stroke="#5fbf7f" stroke-width="2"/>
-    <text x="527" y="152" text-anchor="middle" fill="#5fbf7f" font-size="10" font-family="sans-serif">green</text>
-    <path d="M320 96 L320 114" stroke="#a86fd8" stroke-width="2.5" marker-end="url(#dah3)"/>
-    <circle cx="300" cy="190" r="7" fill="#ededf5"/><circle cx="320" cy="192" r="7" fill="#ededf5"/><circle cx="340" cy="190" r="7" fill="#ededf5"/>
-    <text x="113" y="194" text-anchor="middle" fill="#5c5c70" font-size="9" font-family="sans-serif">wrong — no cover</text>
-    <text x="527" y="194" text-anchor="middle" fill="#5c5c70" font-size="9" font-family="sans-serif">wrong — no cover</text>
-    <defs><marker id="dah3" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#a86fd8"/></marker></defs>
+    <text x="320" y="18" text-anchor="middle" fill="var(--gold)" font-size="12" font-weight="700" font-family="sans-serif">Boss glows a colour → line up behind the MATCHING tombstone</text>
+    <rect x="290" y="40" width="60" height="34" rx="6" fill="var(--diag-fill)" stroke="var(--purple)" stroke-width="2"/>
+    <text x="320" y="62" text-anchor="middle" fill="var(--purple)" font-size="11" font-weight="700" font-family="sans-serif">BOSS</text>
+    <text x="320" y="90" text-anchor="middle" fill="var(--purple)" font-size="10" font-family="sans-serif">cue: purple</text>
+    <rect x="90" y="120" width="46" height="56" rx="4" fill="var(--diag-fill)" stroke="var(--blue)" stroke-width="2"/>
+    <text x="113" y="152" text-anchor="middle" fill="var(--blue)" font-size="10" font-family="sans-serif">blue</text>
+    <rect x="297" y="120" width="46" height="56" rx="4" fill="var(--diag-purple-bg)" stroke="var(--purple)" stroke-width="2.5"/>
+    <text x="320" y="152" text-anchor="middle" fill="var(--purple)" font-size="10" font-weight="700" font-family="sans-serif">purple</text>
+    <rect x="504" y="120" width="46" height="56" rx="4" fill="var(--diag-fill)" stroke="var(--green)" stroke-width="2"/>
+    <text x="527" y="152" text-anchor="middle" fill="var(--green)" font-size="10" font-family="sans-serif">green</text>
+    <path d="M320 96 L320 114" stroke="var(--purple)" stroke-width="2.5" marker-end="url(#dah3)"/>
+    <circle cx="300" cy="190" r="7" fill="var(--txt)"/><circle cx="320" cy="192" r="7" fill="var(--txt)"/><circle cx="340" cy="190" r="7" fill="var(--txt)"/>
+    <text x="113" y="194" text-anchor="middle" fill="var(--faint)" font-size="9" font-family="sans-serif">wrong — no cover</text>
+    <text x="527" y="194" text-anchor="middle" fill="var(--faint)" font-size="9" font-family="sans-serif">wrong — no cover</text>
+    <defs><marker id="dah3" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="var(--purple)"/></marker></defs>
   </svg><div class="cap"><b>Colour-matched cover:</b> the boss charges the tombstone matching its own colour — stand behind that one so it rams the stone instead of the raid.</div></div>`,
 
   soulrun: `<div class="diagram"><svg viewBox="0 0 640 200" role="img" aria-label="Soul interception diagram">
-    <text x="320" y="18" text-anchor="middle" fill="#e0b45c" font-size="12" font-weight="700" font-family="sans-serif">Kill every soul BEFORE it reaches the boss</text>
-    <circle cx="320" cy="110" r="26" fill="#1f1f30" stroke="#e63950" stroke-width="2"/>
-    <text x="320" y="114" text-anchor="middle" fill="#ededf5" font-size="10" font-family="sans-serif">BOSS</text>
-    <rect x="26" y="92" width="54" height="34" rx="6" fill="#2a2418" stroke="#e0b45c" stroke-width="1.5"/>
-    <text x="53" y="106" text-anchor="middle" fill="#e0b45c" font-size="8.5" font-weight="700" font-family="sans-serif">ALTAR</text>
-    <text x="53" y="118" text-anchor="middle" fill="#9a9ab2" font-size="8" font-family="sans-serif">buff here</text>
-    <circle cx="150" cy="46" r="9" fill="#a86fd8"/><circle cx="150" cy="174" r="9" fill="#a86fd8"/>
-    <circle cx="500" cy="46" r="9" fill="#a86fd8"/><circle cx="500" cy="174" r="9" fill="#a86fd8"/>
-    <path d="M162 54 L286 96" stroke="#a86fd8" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#dah4)"/>
-    <path d="M162 166 L286 124" stroke="#a86fd8" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#dah4)"/>
-    <path d="M488 54 L354 96" stroke="#a86fd8" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#dah4)"/>
-    <path d="M488 166 L354 124" stroke="#a86fd8" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#dah4)"/>
-    <text x="320" y="192" text-anchor="middle" fill="#e63950" font-size="10" font-family="sans-serif">each soul that lands = big boss heal</text>
-    <defs><marker id="dah4" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#a86fd8"/></marker></defs>
+    <text x="320" y="18" text-anchor="middle" fill="var(--gold)" font-size="12" font-weight="700" font-family="sans-serif">Kill every soul BEFORE it reaches the boss</text>
+    <circle cx="320" cy="110" r="26" fill="var(--diag-fill)" stroke="var(--red)" stroke-width="2"/>
+    <text x="320" y="114" text-anchor="middle" fill="var(--txt)" font-size="10" font-family="sans-serif">BOSS</text>
+    <rect x="26" y="92" width="54" height="34" rx="6" fill="var(--diag-gold-bg)" stroke="var(--gold)" stroke-width="1.5"/>
+    <text x="53" y="106" text-anchor="middle" fill="var(--gold)" font-size="8.5" font-weight="700" font-family="sans-serif">ALTAR</text>
+    <text x="53" y="118" text-anchor="middle" fill="var(--muted)" font-size="8" font-family="sans-serif">buff here</text>
+    <circle cx="150" cy="46" r="9" fill="var(--purple)"/><circle cx="150" cy="174" r="9" fill="var(--purple)"/>
+    <circle cx="500" cy="46" r="9" fill="var(--purple)"/><circle cx="500" cy="174" r="9" fill="var(--purple)"/>
+    <path d="M162 54 L286 96" stroke="var(--purple)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#dah4)"/>
+    <path d="M162 166 L286 124" stroke="var(--purple)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#dah4)"/>
+    <path d="M488 54 L354 96" stroke="var(--purple)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#dah4)"/>
+    <path d="M488 166 L354 124" stroke="var(--purple)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#dah4)"/>
+    <text x="320" y="192" text-anchor="middle" fill="var(--red)" font-size="10" font-family="sans-serif">each soul that lands = big boss heal</text>
+    <defs><marker id="dah4" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="var(--purple)"/></marker></defs>
   </svg><div class="cap"><b>Soul devour:</b> 4 souls converge on the boss. One player grabs the altar buff and hunts them down; any soul that connects restores a large chunk of the boss's HP.</div></div>`,
 
   stackpool: `<div class="diagram"><svg viewBox="0 0 640 170" role="img" aria-label="Damage-share pool diagram">
-    <text x="160" y="18" text-anchor="middle" fill="#e63950" font-size="12" font-weight="700" font-family="sans-serif">SPREAD — one player eats it all</text>
-    <text x="480" y="18" text-anchor="middle" fill="#e0b45c" font-size="12" font-weight="700" font-family="sans-serif">STACK — damage splits 5 ways</text>
-    <line x1="320" y1="28" x2="320" y2="160" stroke="#2e2e44" stroke-width="1" stroke-dasharray="4 4"/>
-    <ellipse cx="160" cy="100" rx="52" ry="34" fill="#3a1a2a" stroke="#e63950" stroke-width="1.5"/>
-    <circle cx="160" cy="100" r="8" fill="#e63950"/>
-    <circle cx="60" cy="70" r="7" fill="#9a9ab2"/><circle cx="70" cy="140" r="7" fill="#9a9ab2"/>
-    <circle cx="250" cy="66" r="7" fill="#9a9ab2"/><circle cx="256" cy="140" r="7" fill="#9a9ab2"/>
-    <text x="160" y="158" text-anchor="middle" fill="#e63950" font-size="10" font-family="sans-serif">target likely dies</text>
-    <ellipse cx="480" cy="100" rx="52" ry="34" fill="#2a2f22" stroke="#5fbf7f" stroke-width="1.5"/>
-    <circle cx="464" cy="92" r="7" fill="#ededf5"/><circle cx="482" cy="88" r="7" fill="#ededf5"/>
-    <circle cx="498" cy="98" r="7" fill="#ededf5"/><circle cx="470" cy="110" r="7" fill="#ededf5"/><circle cx="490" cy="112" r="7" fill="#ededf5"/>
-    <text x="480" y="158" text-anchor="middle" fill="#5fbf7f" font-size="10" font-family="sans-serif">everyone survives</text>
+    <text x="160" y="18" text-anchor="middle" fill="var(--red)" font-size="12" font-weight="700" font-family="sans-serif">SPREAD — one player eats it all</text>
+    <text x="480" y="18" text-anchor="middle" fill="var(--gold)" font-size="12" font-weight="700" font-family="sans-serif">STACK — damage splits 5 ways</text>
+    <line x1="320" y1="28" x2="320" y2="160" stroke="var(--line)" stroke-width="1" stroke-dasharray="4 4"/>
+    <ellipse cx="160" cy="100" rx="52" ry="34" fill="var(--diag-red-bg)" stroke="var(--red)" stroke-width="1.5"/>
+    <circle cx="160" cy="100" r="8" fill="var(--red)"/>
+    <circle cx="60" cy="70" r="7" fill="var(--muted)"/><circle cx="70" cy="140" r="7" fill="var(--muted)"/>
+    <circle cx="250" cy="66" r="7" fill="var(--muted)"/><circle cx="256" cy="140" r="7" fill="var(--muted)"/>
+    <text x="160" y="158" text-anchor="middle" fill="var(--red)" font-size="10" font-family="sans-serif">target likely dies</text>
+    <ellipse cx="480" cy="100" rx="52" ry="34" fill="var(--diag-green-bg)" stroke="var(--green)" stroke-width="1.5"/>
+    <circle cx="464" cy="92" r="7" fill="var(--txt)"/><circle cx="482" cy="88" r="7" fill="var(--txt)"/>
+    <circle cx="498" cy="98" r="7" fill="var(--txt)"/><circle cx="470" cy="110" r="7" fill="var(--txt)"/><circle cx="490" cy="112" r="7" fill="var(--txt)"/>
+    <text x="480" y="158" text-anchor="middle" fill="var(--green)" font-size="10" font-family="sans-serif">everyone survives</text>
   </svg><div class="cap"><b>Shared pool:</b> a pool lands on a random member and can't be walked out of — the whole party stacks inside it so the damage divides.</div></div>`,
 };
 
@@ -1346,6 +1790,7 @@ function renderDgnFilters() {
 }
 
 function renderDgnList() {
+  const aiOn = !!(SETTINGS && SETTINGS.ai && SETTINGS.ai.enabled);
   const shown = DUNGEONS.filter(dgnMatches);
   $('dgnCount').textContent = shown.length === DUNGEONS.length
     ? `${DUNGEONS.length} instances`
@@ -1378,6 +1823,7 @@ function renderDgnList() {
       <div class="dgn-body">
         <div class="mults" style="margin:12px 0 6px">${metaTags}</div>
         ${pts}${diag}
+        <button class="dgn-ask" type="button" data-name="${d.name.replace(/"/g,'&quot;')}"${aiOn ? '' : ' hidden'}>Ask AI what changed for this instance</button>
       </div>
     </div>`;
   }).join('');
@@ -1571,12 +2017,19 @@ renderBossRows();
 setInterval(updateBossCountdowns, 1000);
 
 // ---- Other: Time Rift fixed schedule (Taiwan server, UTC+8) ----
-const RIFT_HOURS = [2, 5, 8, 11, 14, 17, 20, 23];
+// Defaults are the Taiwan-server schedule; both the hours and the server time
+// zone are overridable in Settings, because we have no verified schedule for
+// the other regions and would rather be configurable than wrong.
+const RIFT_HOURS_DEFAULT = [2, 5, 8, 11, 14, 17, 20, 23];
+let RIFT_HOURS = RIFT_HOURS_DEFAULT.slice();
+let RIFT_OFFSET_MS = 8 * 3600000;
 const RIFT_OPEN_MIN = 30;
 function updateRiftTimer(){
-  const TW_OFFSET = 8 * 3600000;
   const nowUTC = Date.now();
-  const msOfDayTW = ((nowUTC + TW_OFFSET) % 86400000 + 86400000) % 86400000;
+  const msOfDayTW = RIFT_OFFSET_MS === null
+    ? (() => { const d = new Date(); return ((d.getHours()*60 + d.getMinutes())*60 + d.getSeconds())*1000; })()
+    : ((nowUTC + RIFT_OFFSET_MS) % 86400000 + 86400000) % 86400000;
+  if (!RIFT_HOURS.length){ $('riftStatus').textContent = 'No hours set'; $('riftCountdown').textContent = '—'; return; }
   for (const h of RIFT_HOURS){
     const start = h * 3600000, end = start + RIFT_OPEN_MIN * 60000;
     if (msOfDayTW >= start && msOfDayTW < end){
