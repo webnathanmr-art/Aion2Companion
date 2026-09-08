@@ -46,7 +46,7 @@ in the app that doesn't have an official English name yet.
 
 ![Guides](screenshots/04-guides-dungeons.png)
 
-### Other (BETA)
+### Other
 Daily/weekly quest checklist with real reset timing, a Field/World Boss and
 Taiwan-server Time Rift event timer, a best-effort Patch Notes fetcher with
 guaranteed fallback links to official sources, and general-purpose
