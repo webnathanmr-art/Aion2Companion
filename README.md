@@ -3,10 +3,67 @@
 An English-language Electron desktop toolkit for Aion2, built around a
 translated port of StepTube's Korean stat-efficiency calculator (originally
 at https://kjymm2.github.io/aion2damage/) plus original tools compiled from
-Korean and Taiwanese community research: a Combat Power breakdown, an
-Arcana deck simulator, dungeon-mechanics guides, and a set of daily-use
-utilities (checklist, boss/event timers, enhancement and crafting
-calculators, patch notes).
+Korean and Taiwanese community research.
+
+**[⬇ Download the latest Windows build](../../releases/latest)** — portable
+`.exe`, no installer needed.
+
+## Features
+
+### Combat Power Breakdown
+Aion2 has two different "power" numbers — the official, server-computed
+Combat Power, and 아툴/Atool, a community DPS-estimate score — and they can
+diverge. This tab compiles what's actually confirmed: exact Arcana grade
+values, an Attribute/Pantheon planner, Independent Proc mechanics (Smite,
+Perfect, Multi-Hit), Accuracy/Hit mechanics with a live calculator, Soul
+Engraving priority by gear slot, and Pet Understanding priority — plus two
+stat-priority lists that deliberately disagree (official CP weight vs. real
+DPS impact) and say why.
+
+![Combat Power Breakdown](screenshots/01-combat-power.png)
+
+### Damage Efficiency
+The original calculator, fully translated: enter your stats to see the real
+damage increase from raising each stat by 1 percentage point, which flat
+attack-power sources are worth the most, and a Manastone/Gear option
+simulator that recomputes your exact total damage change.
+
+![Damage Efficiency](screenshots/02-damage-efficiency.png)
+
+### Arcana Deck Simulator
+Plan an Arcana loadout without guessing at a slot count the game itself
+keeps changing — set it yourself (1–12) and the deck summary tracks Combat
+Power plus which of the 7 known sets have hit their 2-piece/4-piece bonus
+threshold, backed by a sourced set-effects reference.
+
+![Arcana Deck Simulator](screenshots/03-arcana-deck-simulator.png)
+
+### Guides
+Translated, sourced dungeon-mechanics writeups (Transcendence's Shattered
+Arcanis & Deus Research Base, Cradle of Desire, all four Fierce Horn Cave
+bosses) plus a Korean/Chinese ↔ English term glossary for everything else
+in the app that doesn't have an official English name yet.
+
+![Guides](screenshots/04-guides-dungeons.png)
+
+### Other (BETA)
+Daily/weekly quest checklist with real reset timing, a Field/World Boss and
+Taiwan-server Time Rift event timer, a best-effort Patch Notes fetcher with
+guaranteed fallback links to official sources, and general-purpose
+Enhancement Cost and Crafting Profit calculators.
+
+![Daily/Weekly Checklist](screenshots/05-other-checklist.png)
+![Boss/Event Timer](screenshots/06-other-bosstimer.png)
+
+## Honesty by design
+
+Aion2 has no public API and most of its systems (Combat Power's real
+formula, current Arcana slot count, exact enhancement success rates) are
+either undocumented or actively changing between patches. Rather than
+present guessed numbers as fact, this app is explicit throughout about
+what's confirmed vs. directional, cites its Korean/Taiwanese community
+sources, and gives you inputs to fill in with your own in-game values where
+no reliable number exists.
 
 ## Run in development
 
@@ -23,5 +80,5 @@ npm run dist
 ```
 
 This uses `electron-builder` to produce a platform-native package (`.dmg` on
-macOS, `.exe`/NSIS installer on Windows, `.AppImage` on Linux) under
-`release/`.
+macOS, `.exe`/NSIS installer or portable on Windows, `.AppImage` on Linux)
+under `release/`.
