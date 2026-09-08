@@ -88,6 +88,9 @@
   .subtabpanel{display:none;margin-top:16px}
   .subtabpanel.active{display:block}
   .beta-badge{display:inline-block;background:var(--red);color:#fff;font-size:9px;font-weight:800;letter-spacing:.5px;padding:2px 6px;border-radius:999px;margin-left:6px;vertical-align:middle;position:relative;top:-1px}
+  .diagram{background:#12121c;border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:12px;overflow-x:auto}
+  .diagram svg{display:block;max-width:100%;height:auto;margin:0 auto}
+  .diagram .cap{font-size:11px;color:var(--muted);text-align:center;margin-top:8px;line-height:1.5}
   /* checklist */
   .chk-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
   .chk-item:last-child{border-bottom:none}
@@ -404,25 +407,68 @@
     </div>
     <div class="subtabs">
       <button class="subtab-btn active" data-subtab="dungeons">Dungeon Mechanics</button>
+      <button class="subtab-btn" data-subtab="classes">Classes</button>
+      <button class="subtab-btn" data-subtab="progression">Progression</button>
+      <button class="subtab-btn" data-subtab="pvp">PvP</button>
+      <button class="subtab-btn" data-subtab="patches">Patch History</button>
       <button class="subtab-btn" data-subtab="glossary">Term Glossary</button>
     </div>
 
     <!-- Dungeon Mechanics -->
     <div id="sub-dungeons" class="subtabpanel active">
       <div class="card">
-        <h2>Latest Content: Chapter 1 — "Land of Sand and Frost" <span style="color:var(--muted);font-weight:400;font-size:12px">— July 1, 2026</span></h2>
-        <div class="tier-row"><div class="tier-badge tier-S">NEW</div><div><div class="tier-name">Brawler class</div><div class="tier-desc">Gauntlet-wielding front-line class built around rapid chain attacks and aggressive engages.</div></div></div>
-        <div class="tier-row"><div class="tier-badge tier-A">CAP</div><div><div class="tier-name">Level cap 50 · Stigma cap 25</div><div class="tier-desc">Character level cap raised to 50; the Stigma skill reinforcement ceiling was adjusted to level 25.</div></div></div>
-        <div class="tier-row"><div class="tier-badge tier-A">MAP</div><div><div class="tier-name">New regions: Eltnen (Elyos) & Morheim (Asmodian)</div><div class="tier-desc">Each brings its own Monolith, plus new Sealed Dungeons and Strongholds.</div></div></div>
-        <div class="tier-row"><div class="tier-badge tier-B">SYS</div><div><div class="tier-name">Sealed Dungeons & Strongholds</div><div class="tier-desc">Repeatable reward content for endgame materials, experience and progression items; certain Regional Quests, Sealed Dungeons and Strongholds also grant Daevanion Skill points.</div></div></div>
-        <div class="tier-row"><div class="tier-badge tier-B">GEAR</div><div><div class="tier-name">New Pendant slot · Hero-grade Amulets & Belts</div><div class="tier-desc">New accessory equipment added alongside the region content.</div></div></div>
-        <div class="note">※ A follow-up update on August 12, 2026 added the Dice and Lantern Arcana slots (see the Arcana Deck Simulator tab).</div>
-      </div>
-
-      <div class="card" style="margin-top:18px">
         <h2>Transcendence (초월) Dungeons <span style="color:var(--muted);font-weight:400;font-size:12px">— 10-stage endgame content, difficulty scales per stage</span></h2>
         <div class="tier-row"><div class="tier-badge tier-S">01</div><div><div class="tier-name">Shattered Arcanis — Boss: Talisra</div><div class="tier-desc">Wipe-mechanic phases trigger at ~60% and ~30% HP. Blue and purple orbs spawn at the map edges and drift toward the boss; assign 2 players to each color <i>before</i> the pull. Collecting an orb grants a shield of that color — if everyone chases one color, the opposite shield never forms and the raid wipes.</div></div></div>
         <div class="tier-row"><div class="tier-badge tier-S">02</div><div><div class="tier-name">Deus Research Base — Boss: Artiel</div><div class="tier-desc">Fast-paced boss that mixes patterns quickly. At certain HP thresholds it destroys the map's outer edge, shrinking the arena and increasing hazard density; its knockback attacks can then knock you off the map. From stage 4 onward it alternates two contradictory chain mechanics — "You can't escape me" (move <i>away</i> from the boss) and "Bound in chains" (move <i>toward</i>/stick to the boss) — reading the callout correctly matters more than reflexes here.</div></div></div>
+
+        <div class="diagram">
+          <svg viewBox="0 0 640 210" role="img" aria-label="Shattered Arcanis orb and shield assignment diagram">
+            <text x="160" y="18" text-anchor="middle" fill="#e0b45c" font-size="12" font-weight="700" font-family="sans-serif">CORRECT — 2 per colour</text>
+            <text x="480" y="18" text-anchor="middle" fill="#e63950" font-size="12" font-weight="700" font-family="sans-serif">WIPE — everyone stacks one colour</text>
+            <line x1="320" y1="28" x2="320" y2="200" stroke="#2e2e44" stroke-width="1" stroke-dasharray="4 4"/>
+            <circle cx="160" cy="115" r="66" fill="none" stroke="#2e2e44" stroke-width="1.5"/>
+            <circle cx="160" cy="115" r="20" fill="#1f1f30" stroke="#9a9ab2" stroke-width="1.5"/>
+            <text x="160" y="119" text-anchor="middle" fill="#ededf5" font-size="10" font-family="sans-serif">BOSS</text>
+            <circle cx="110" cy="75" r="9" fill="#4a9de0"/><circle cx="130" cy="60" r="9" fill="#4a9de0"/>
+            <circle cx="190" cy="60" r="9" fill="#a86fd8"/><circle cx="210" cy="75" r="9" fill="#a86fd8"/>
+            <path d="M118 88 L140 104" stroke="#4a9de0" stroke-width="1.5" marker-end="url(#ah)"/>
+            <path d="M202 88 L180 104" stroke="#a86fd8" stroke-width="1.5" marker-end="url(#ah)"/>
+            <text x="160" y="196" text-anchor="middle" fill="#9a9ab2" font-size="10" font-family="sans-serif">both shields form → survive</text>
+            <circle cx="480" cy="115" r="66" fill="none" stroke="#2e2e44" stroke-width="1.5"/>
+            <circle cx="480" cy="115" r="20" fill="#1f1f30" stroke="#9a9ab2" stroke-width="1.5"/>
+            <text x="480" y="119" text-anchor="middle" fill="#ededf5" font-size="10" font-family="sans-serif">BOSS</text>
+            <circle cx="430" cy="75" r="9" fill="#4a9de0"/><circle cx="450" cy="60" r="9" fill="#4a9de0"/>
+            <circle cx="510" cy="60" r="9" fill="#4a9de0"/><circle cx="530" cy="75" r="9" fill="#4a9de0"/>
+            <text x="480" y="150" text-anchor="middle" fill="#e63950" font-size="22" font-weight="800" font-family="sans-serif">✕</text>
+            <text x="480" y="196" text-anchor="middle" fill="#e63950" font-size="10" font-family="sans-serif">purple shield never forms → raid wipes</text>
+            <defs><marker id="ah" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#9a9ab2"/></marker></defs>
+          </svg>
+          <div class="cap"><b>Shattered Arcanis:</b> assign 2 players to blue and 2 to purple <i>before</i> the pull. Orbs drift inward from the map edge; each one collected raises a shield of that colour.</div>
+        </div>
+
+        <div class="diagram">
+          <svg viewBox="0 0 640 190" role="img" aria-label="Deus Research Base chain callout diagram">
+            <text x="160" y="18" text-anchor="middle" fill="#ededf5" font-size="12" font-weight="700" font-family="sans-serif">"You can't escape me"</text>
+            <text x="160" y="34" text-anchor="middle" fill="#e0b45c" font-size="11" font-weight="700" font-family="sans-serif">RUN AWAY →</text>
+            <circle cx="160" cy="105" r="22" fill="#1f1f30" stroke="#e63950" stroke-width="1.5"/>
+            <text x="160" y="109" text-anchor="middle" fill="#ededf5" font-size="10" font-family="sans-serif">BOSS</text>
+            <path d="M186 105 L246 105" stroke="#e0b45c" stroke-width="2" marker-end="url(#ah2)"/>
+            <path d="M134 105 L74 105" stroke="#e0b45c" stroke-width="2" marker-end="url(#ah2)"/>
+            <circle cx="258" cy="105" r="8" fill="#4a9de0"/><circle cx="62" cy="105" r="8" fill="#4a9de0"/>
+            <line x1="320" y1="10" x2="320" y2="180" stroke="#2e2e44" stroke-width="1" stroke-dasharray="4 4"/>
+            <text x="480" y="18" text-anchor="middle" fill="#ededf5" font-size="12" font-weight="700" font-family="sans-serif">"Bound in chains"</text>
+            <text x="480" y="34" text-anchor="middle" fill="#e0b45c" font-size="11" font-weight="700" font-family="sans-serif">← STACK ON BOSS</text>
+            <circle cx="480" cy="105" r="22" fill="#1f1f30" stroke="#e63950" stroke-width="1.5"/>
+            <text x="480" y="109" text-anchor="middle" fill="#ededf5" font-size="10" font-family="sans-serif">BOSS</text>
+            <path d="M566 105 L512 105" stroke="#e0b45c" stroke-width="2" marker-end="url(#ah2)"/>
+            <path d="M394 105 L448 105" stroke="#e0b45c" stroke-width="2" marker-end="url(#ah2)"/>
+            <circle cx="578" cy="105" r="8" fill="#4a9de0"/><circle cx="382" cy="105" r="8" fill="#4a9de0"/>
+            <text x="320" y="176" text-anchor="middle" fill="#9a9ab2" font-size="10" font-family="sans-serif">Stage 4+ alternates both — read the callout, don't guess</text>
+            <defs><marker id="ah2" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#e0b45c"/></marker></defs>
+          </svg>
+          <div class="cap"><b>Deus Research Base:</b> two chain callouts that demand opposite reactions. The arena also shrinks at HP thresholds, so knockbacks near the edge become lethal.</div>
+        </div>
+
         <div class="note">※ Higher Transcendence stages (1–10) scale monster stats, add dungeon-wide weather effects, and give named bosses additional/stronger patterns on top of the above.</div>
       </div>
 
@@ -430,6 +476,26 @@
         <h2>Cradle of Desire (무의 요람) <span style="color:var(--muted);font-weight:400;font-size:12px">— expedition</span></h2>
         <div class="tier-row"><div class="tier-badge tier-A">01</div><div><div class="tier-name">Multidimensional Beltiras</div><div class="tier-desc">Bait the boss's charge attack into a pillar to destroy it. "Nebula Collapse" summons 8 blue orbs around the boss — lure your ground-targeted zones onto them to destroy the orbs before they resolve.</div></div></div>
         <div class="tier-row"><div class="tier-badge tier-S">02</div><div><div class="tier-name">Anguished Bakarma (final boss)</div><div class="tier-desc">Watch the boss's color/dialogue cue, then hide behind the tombstone matching that color so the boss rams into it instead of the raid.</div></div></div>
+        <div class="diagram">
+          <svg viewBox="0 0 640 200" role="img" aria-label="Anguished Bakarma tombstone colour-matching diagram">
+            <text x="320" y="18" text-anchor="middle" fill="#e0b45c" font-size="12" font-weight="700" font-family="sans-serif">Boss glows a colour → line up behind the MATCHING tombstone</text>
+            <rect x="290" y="40" width="60" height="34" rx="6" fill="#1f1f30" stroke="#a86fd8" stroke-width="2"/>
+            <text x="320" y="62" text-anchor="middle" fill="#a86fd8" font-size="11" font-weight="700" font-family="sans-serif">BOSS</text>
+            <text x="320" y="90" text-anchor="middle" fill="#a86fd8" font-size="10" font-family="sans-serif">cue: purple</text>
+            <rect x="90" y="120" width="46" height="56" rx="4" fill="#1f1f30" stroke="#4a9de0" stroke-width="2"/>
+            <text x="113" y="152" text-anchor="middle" fill="#4a9de0" font-size="10" font-family="sans-serif">blue</text>
+            <rect x="297" y="120" width="46" height="56" rx="4" fill="#2a1f38" stroke="#a86fd8" stroke-width="2.5"/>
+            <text x="320" y="152" text-anchor="middle" fill="#a86fd8" font-size="10" font-weight="700" font-family="sans-serif">purple</text>
+            <rect x="504" y="120" width="46" height="56" rx="4" fill="#1f1f30" stroke="#5fbf7f" stroke-width="2"/>
+            <text x="527" y="152" text-anchor="middle" fill="#5fbf7f" font-size="10" font-family="sans-serif">green</text>
+            <path d="M320 96 L320 114" stroke="#a86fd8" stroke-width="2.5" marker-end="url(#ah3)"/>
+            <circle cx="300" cy="190" r="7" fill="#ededf5"/><circle cx="320" cy="192" r="7" fill="#ededf5"/><circle cx="340" cy="190" r="7" fill="#ededf5"/>
+            <text x="113" y="194" text-anchor="middle" fill="#5c5c70" font-size="9" font-family="sans-serif">wrong — no cover</text>
+            <text x="527" y="194" text-anchor="middle" fill="#5c5c70" font-size="9" font-family="sans-serif">wrong — no cover</text>
+            <defs><marker id="ah3" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#a86fd8"/></marker></defs>
+          </svg>
+          <div class="cap"><b>Anguished Bakarma:</b> the boss charges the tombstone matching its own colour — stand behind that one so it rams the stone instead of the raid.</div>
+        </div>
       </div>
 
       <div class="card" style="margin-top:18px">
@@ -443,6 +509,96 @@
       <div class="card" style="margin-top:18px">
         <h2>Temple of Fire (불의 신전) <span style="color:var(--muted);font-weight:400;font-size:12px">— nicknamed "the Wall of Tears," a known difficulty spike</span></h2>
         <div class="note" style="margin-top:0">Boss: Chromede's Desire. Widely reported as one of the harder difficulty gates in current content, but we couldn't source a clear, sourced breakdown of its specific boss patterns the way we could for the dungeons above — treat this entry as "known to be hard," not a mechanics guide, until better sources turn up.</div>
+      </div>
+    </div>
+
+    <!-- Classes -->
+    <div id="sub-classes" class="subtabpanel">
+      <div class="card">
+        <h2>All 9 Classes <span style="color:var(--muted);font-weight:400;font-size:12px">— 8 at launch, Brawler added in Chapter 1</span></h2>
+        <table class="attr">
+          <tr><th>Class</th><th>Role</th><th>Playstyle</th></tr>
+          <tr><td><b>Templar</b></td><td class="num">Tank</td><td>Shield-bearing guardian — seizes enemy attention and holds the front line.</td></tr>
+          <tr><td><b>Gladiator</b></td><td class="num">Melee DPS</td><td>Hard-hitting frontline fighter built around sustained damage.</td></tr>
+          <tr><td><b>Assassin</b></td><td class="num">Melee DPS</td><td>Burst-focused striker — hits hard and slips away. Highest attack speed.</td></tr>
+          <tr><td><b>Brawler</b></td><td class="num">Melee DPS</td><td>Gauntlet class from Chapter 1 — rapid chain attacks and aggressive front-line engages.</td></tr>
+          <tr><td><b>Ranger</b></td><td class="num">Ranged DPS</td><td>Bow specialist who controls space from a distance; forgiving to level.</td></tr>
+          <tr><td><b>Sorcerer</b></td><td class="num">Magic DPS</td><td>Heavy spell damage plus crowd control (ice/fire control, blink).</td></tr>
+          <tr><td><b>Spiritmaster</b><br><span style="font-size:10.5px;color:var(--muted)">(a.k.a. Elementalist)</span></td><td class="num">Magic DPS</td><td>Summoner — pets, zone control and sustained damage over time.</td></tr>
+          <tr><td><b>Cleric</b></td><td class="num">Healer</td><td>Core healer with shield/mace hybrid damage; group heals and shields, strong in both PvE and PvP.</td></tr>
+          <tr><td><b>Chanter</b></td><td class="num">Support</td><td>Buffs and bolsters the group while holding its own in a fight.</td></tr>
+        </table>
+        <div class="note">
+          ※ Beginner-friendliest picks are usually Templar (simple rotation, always wanted) or Cleric (highest group demand). Assassin and Sorcerer have the highest skill ceilings.<br>
+          ※ "Spiritmaster" and "Elementalist" appear to be two translations of the same pet/control caster — NC hadn't settled the final Global English name at the time of writing, so you may see either.<br>
+          ※ Class balance shifts every patch; this table covers roles and identity, which are stable, rather than a tier list, which isn't.
+        </div>
+      </div>
+    </div>
+
+    <!-- Progression -->
+    <div id="sub-progression" class="subtabpanel">
+      <div class="card">
+        <h2>Two Numbers That Gate Everything <span style="color:var(--muted);font-weight:400;font-size:12px">— Gear Score vs Combat Power</span></h2>
+        <div class="tier-row"><div class="tier-badge tier-A">GS</div><div><div class="tier-name">Gear Score / Item Level</div><div class="tier-desc">The <b>gatekeeper</b>. Content checks this to let you in — item level ~1,000 is the threshold for finishing the story and entering the first endgame dungeons. You can be gear-score-eligible and still be too weak.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-S">CP</div><div><div class="tier-name">Combat Power</div><div class="tier-desc">Your <b>actual power</b>, and what other players judge you by. See the Combat Power Breakdown tab for what actually raises it — and why it can disagree with your real damage.</div></div></div>
+        <div class="note">※ Published CP milestone numbers vary wildly between guides (we've seen "550+", "2,400+" and "46,000" all used as goalposts) — most likely different scales or pre/post-rescale patches. We're not repeating a specific target here because we couldn't reconcile them; use the progression <i>order</i> below instead, which every source agrees on.</div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <h2>Endgame Progression Order <span style="color:var(--muted);font-weight:400;font-size:12px">— what to farm, in what order</span></h2>
+        <div class="tier-row"><div class="tier-badge tier-S">1</div><div><div class="tier-name">Finish the main story → level cap</div><div class="tier-desc">Non-negotiable first step; the story carries you to the item level that unlocks endgame content.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-A">2</div><div><div class="tier-name">Clear out the map: green quests, Sealed Dungeons, Strongholds, missed feathers</div><div class="tier-desc">Do these across <b>both</b> friendly and enemy territory. Cheap, one-time power that most players leave on the table. Some also grant Daevanion Skill points.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-A">3</div><div><div class="tier-name">Transcendence stages 1–3</div><div class="tier-desc">The main early-endgame loop, and where you start filling empty <b>Arcana</b> slots.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-B">4</div><div><div class="tier-name">Abyss gear (PvP currency)</div><div class="tier-desc">Bought with Abyss Points — see the PvP tab.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-B">5</div><div><div class="tier-name">Vakron → Temple of Fire</div><div class="tier-desc">The late-game difficulty gates; Temple of Fire is nicknamed "the Wall of Tears" for a reason.</div></div></div>
+        <div class="note">
+          ※ Priority within any stage: <b>weapon and accessories first</b> — they carry the most damage per upgrade (see Soul Engraving priority in the Combat Power tab).<br>
+          ※ Parallel long-term tracks that never stop paying: pets, wings, Pantheon/Monolith stats, Arcana, Stigma skills, and crafted endgame gear.
+        </div>
+      </div>
+    </div>
+
+    <!-- PvP -->
+    <div id="sub-pvp" class="subtabpanel">
+      <div class="card">
+        <h2>PvP Systems</h2>
+        <div class="tier-row"><div class="tier-badge tier-S">1</div><div><div class="tier-name">The Abyss — open-world faction warfare</div><div class="tier-desc">Aion's signature PvP space: a three-dimensional zone where Elyos and Asmodians fight over territory, contested world bosses and siege-style objectives on repeatable reward loops. Note the structural change from the original Aion — factions meet in <b>designated areas/modes</b> rather than through the old massive fortress sieges.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-A">2</div><div><div class="tier-name">Rifting — invading enemy territory</div><div class="tier-desc">Rift events temporarily open passages into normally-safe enemy zones. Aion 2 adds a <b>War Mode toggle</b>: entering a rift defaults to PvE safety, and you manually flag War Mode to become attackable (and able to attack).</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-A">3</div><div><div class="tier-name">Arenas — instanced, rated</div><div class="tier-desc">Structured formats with queuing, matchmaking and rating. Arena of Solitude is the 1v1 format. <b>Gear is not equalized</b> — progression and optimization carry directly into arena results.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-B">4</div><div><div class="tier-name">Abyss Points (AP) — the PvP currency</div><div class="tier-desc">The main PvP currency, and the only way to buy PvP gear. Weekly AP earning is capped (PvE hunting and PvP share the same allowance).</div></div></div>
+        <div class="note">
+          ※ Ranking tracks three separate things: individual Abyss rank (total AP accumulated), per-format Arena rating, and seasonal rankings across all formats.<br>
+          ※ For PvP stat priority specifically, note from the Combat Power tab that <b>Critical Damage is far weaker in PvP</b> (1.25× base multiplier instead of PvE's 1.5×, and the Critical Damage stat is only ~15% as effective), and that the Indomitability Arcana set is the PvP-defensive pick.
+        </div>
+      </div>
+    </div>
+
+    <!-- Patch History -->
+    <div id="sub-patches" class="subtabpanel">
+      <div class="card">
+        <h2>Chapter 1 — "Land of Sand and Frost" <span style="color:var(--muted);font-weight:400;font-size:12px">— July 1, 2026</span></h2>
+        <div class="tier-row"><div class="tier-badge tier-S">NEW</div><div><div class="tier-name">Brawler class</div><div class="tier-desc">Gauntlet-wielding front-line class built around rapid chain attacks and aggressive engages.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-A">CAP</div><div><div class="tier-name">Level cap 50 · Stigma cap 25</div><div class="tier-desc">Character level cap raised to 50; the Stigma skill reinforcement ceiling was adjusted to level 25.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-A">MAP</div><div><div class="tier-name">New regions: Eltnen (Elyos) & Morheim (Asmodian)</div><div class="tier-desc">Each brings its own Monolith, plus new Sealed Dungeons and Strongholds.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-A">ARC</div><div><div class="tier-name">Key & Hourglass Arcana slots</div><div class="tier-desc">Two new Arcana equipment slots, bringing the roster to 8.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-B">SYS</div><div><div class="tier-name">Sealed Dungeons & Strongholds</div><div class="tier-desc">Repeatable reward content for endgame materials, experience and progression items; certain Regional Quests, Sealed Dungeons and Strongholds also grant Daevanion Skill points.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-B">GEAR</div><div><div class="tier-name">New Pendant slot · Hero-grade Amulets & Belts</div><div class="tier-desc">New accessory equipment added alongside the region content.</div></div></div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <h2>Timeline <span style="color:var(--muted);font-weight:400;font-size:12px">— the changes this app tracks</span></h2>
+        <table class="attr">
+          <tr><th>Date</th><th>Change</th><th>Affects</th></tr>
+          <tr><td>Nov 2025</td><td>Aion 2 launches in Korea &amp; Taiwan</td><td class="num">—</td></tr>
+          <tr><td>Dec 2025</td><td>Regular field-boss cooldowns broadly halved</td><td class="num">Boss Timer</td></tr>
+          <tr><td>2026 (Season 3)</td><td>Punishment, Guardian &amp; Indomitability Arcana sets added; Pantheon stats on new sets up to +5 higher</td><td class="num">Arcana</td></tr>
+          <tr><td>2026</td><td>Combat Power reweighted: Smite/Accuracy/Critical up, Penetration/Spirit down</td><td class="num">Combat Power</td></tr>
+          <tr><td>Jul 1, 2026</td><td>Chapter 1 — Brawler, level 50, Eltnen/Morheim, Key + Hourglass Arcana</td><td class="num">Guides, Arcana</td></tr>
+          <tr><td>Aug 12, 2026</td><td>Dice + Lantern Arcana slots added (roster reaches 10)</td><td class="num">Arcana</td></tr>
+          <tr><td>Oct 5, 2026</td><td>Aion 2 Global full launch (NA/SA/EU/Asia, 10 languages)</td><td class="num">All</td></tr>
+        </table>
+        <div class="note">※ Global may not ship with every KR/TW system at once — treat KR/TW-dated entries above as "exists on the Korean/Taiwan build," not a guarantee for your server.</div>
       </div>
     </div>
 
