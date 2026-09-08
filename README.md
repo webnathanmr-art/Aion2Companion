@@ -39,10 +39,14 @@ threshold, backed by a sourced set-effects reference.
 ![Arcana Deck Simulator](screenshots/03-arcana-deck-simulator.png)
 
 ### Guides
-Translated, sourced dungeon-mechanics writeups (Transcendence's Shattered
-Arcanis & Deus Research Base, Cradle of Desire, all four Fierce Horn Cave
-bosses) plus a Korean/Chinese ↔ English term glossary for everything else
-in the app that doesn't have an official English name yet.
+A searchable index of 17 instances across Transcendence, Expedition, Raid
+and Solo — filter by category or search any dungeon, boss or mechanic
+("orb", "Kromede", "wipe") and expand the one you need, with original
+diagrams for the mechanics that are easier to see than to read. Entries
+where no reliable write-up could be found are marked and say so, rather
+than carrying invented mechanics. Alongside it: Classes, Progression, PvP,
+Patch History, and a Korean/Chinese ↔ English term glossary for everything
+in the app that has no official English name yet.
 
 ![Guides](screenshots/04-guides-dungeons.png)
 
@@ -51,6 +55,11 @@ Daily/weekly quest checklist with real reset timing, a Field/World Boss and
 Taiwan-server Time Rift event timer, a best-effort Patch Notes fetcher with
 guaranteed fallback links to official sources, and general-purpose
 Enhancement Cost and Crafting Profit calculators.
+
+Everything you type is saved locally between sessions — stat inputs, Arcana
+deck, checklist progress, timers and calculator rows — and "Reset saved
+data" in the tab bar clears it. Ctrl/Cmd+1–5 switch tabs; Ctrl/Cmd+F jumps
+straight to dungeon search.
 
 ![Daily/Weekly Checklist](screenshots/05-other-checklist.png)
 ![Boss/Event Timer](screenshots/06-other-bosstimer.png)
