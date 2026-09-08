@@ -119,8 +119,8 @@ function publicSettings() {
     encryptionAvailable: encryptionAvailable(),
     providers: Object.entries(AI_PROVIDERS).map(([id, p]) => ({
       id, label: p.label, free: !!p.free, local: !!p.local,
-      search: !!p.search, keyUrl: p.keyUrl || '', needsKey: !p.local,
-      defaultModel: p.defaultModel || '', note: p.note || ''
+      search: !!p.search, keyUrl: p.keyUrl || '', needsKey: !p.local && !p.noKey,
+      defaultModel: p.defaultModel || '', note: p.note || '', setup: p.setup || ''
     }))
   };
 }
@@ -162,6 +162,7 @@ ipcMain.handle('settings:openFolder', () => {
 
 const AI_PROVIDERS = {
   gemini: {
+    setup: 'Free tier, no card needed. Sign in with a Google account at aistudio.google.com/apikey, click "Create API key", paste it here.',
     label: 'Google Gemini',
     free: true, search: true,
     keyUrl: 'https://aistudio.google.com/apikey',
@@ -228,6 +229,7 @@ const AI_PROVIDERS = {
   },
 
   openrouter: {
+    setup: 'Free account. Sign up at openrouter.ai, open Keys, create one, paste it here. Models ending in :free cost nothing.',
     label: 'OpenRouter',
     free: true, search: true,
     keyUrl: 'https://openrouter.ai/keys',
@@ -237,6 +239,7 @@ const AI_PROVIDERS = {
   },
 
   groq: {
+    setup: 'Free account. Sign up at console.groq.com, open API Keys, create one, paste it here.',
     label: 'Groq',
     free: true,
     keyUrl: 'https://console.groq.com/keys',
@@ -254,6 +257,8 @@ const AI_PROVIDERS = {
   },
 
   ollama: {
+    noKey: true,
+    setup: 'No account and no key at all. Install Ollama from ollama.com, then run: ollama pull llama3.1',
     label: 'Ollama (local, offline)',
     free: true, local: true,
     defaultModel: 'llama3.1',
@@ -262,6 +267,7 @@ const AI_PROVIDERS = {
   },
 
   custom: {
+    noKey: true,
     label: 'Custom (OpenAI-compatible)',
     defaultModel: '',
     note: 'Any endpoint that speaks the OpenAI chat-completions API — LM Studio, llama.cpp, LiteLLM, a self-hosted gateway.',
@@ -349,16 +355,16 @@ const AI_SYSTEM = [
   '- Be concise. Use short paragraphs or bullets, no preamble.'
 ].join('\n');
 
-async function runAI(prompt) {
+async function runAI(prompt, systemPrompt) {
   const s = readSettingsRaw();
   const cfg = s.ai || {};
   const provider = AI_PROVIDERS[cfg.provider];
   if (!provider) throw new Error('No AI provider selected');
   const key = loadKey(s);
-  if (!provider.local && !key) throw new Error('No API key saved for ' + provider.label);
+  if (!provider.local && !provider.noKey && !key) throw new Error('No API key saved for ' + provider.label);
   if (cfg.provider === 'custom' && !cfg.baseUrl) throw new Error('Custom provider needs a base URL');
 
-  const { url, headers, body } = provider.build(cfg, key, AI_SYSTEM, prompt);
+  const { url, headers, body } = provider.build(cfg, key, systemPrompt || AI_SYSTEM, prompt);
   if (!url || url.startsWith('/')) throw new Error('This provider needs a base URL in Settings');
   const json = await postJSON(url, headers, body);
   const out = provider.parse(json);
@@ -391,6 +397,151 @@ ipcMain.handle('ai:test', async () => {
     return { success: false, error: e.message || String(e) };
   }
 });
+
+// ---------------------------------------------------------------------------
+// AI-contributed content
+// ---------------------------------------------------------------------------
+// The app's own guides are the base layer and are never modified. Anything the
+// model contributes is stored separately here, keyed by target, and rendered as
+// a clearly-marked overlay that the user can refresh or delete per target or all
+// at once. Keeping the two layers apart is what makes "let the AI update the
+// app" safe: nothing it produces can quietly overwrite a sourced fact.
+
+const CONTENT_FILE = () => path.join(app.getPath('userData'), 'ai-content.json');
+
+function readContent() {
+  try { return JSON.parse(fs.readFileSync(CONTENT_FILE(), 'utf8')) || {}; }
+  catch (e) { return {}; }
+}
+function writeContent(c) {
+  try {
+    fs.mkdirSync(path.dirname(CONTENT_FILE()), { recursive: true });
+    fs.writeFileSync(CONTENT_FILE(), JSON.stringify(c, null, 2), 'utf8');
+    return true;
+  } catch (e) { return false; }
+}
+
+const clean = (v, max) => String(v == null ? '' : v).replace(/\s+/g, ' ').trim().slice(0, max);
+
+// Model output is data, never markup and never trusted shape. Everything is
+// coerced to plain strings with hard caps before it is allowed near the store.
+function sanitiseUpdate(raw) {
+  if (!raw || typeof raw !== 'object') throw new Error('Model did not return an object');
+  const entries = (Array.isArray(raw.entries) ? raw.entries : []).slice(0, 8).map(e => ({
+    heading: clean(e && e.heading, 120),
+    bullets: (Array.isArray(e && e.bullets) ? e.bullets : []).slice(0, 8)
+      .map(b => clean(b, 400)).filter(Boolean),
+    confidence: ['high', 'medium', 'low'].includes(e && e.confidence) ? e.confidence : 'low'
+  })).filter(e => e.heading && e.bullets.length);
+
+  const sources = (Array.isArray(raw.sources) ? raw.sources : []).slice(0, 10).map(x => {
+    const url = clean(x && x.url, 400);
+    let ok = '';
+    try { const u = new URL(url); if (u.protocol === 'http:' || u.protocol === 'https:') ok = u.href; }
+    catch (e) { /* drop */ }
+    return ok ? { title: clean((x && x.title) || ok, 160), url: ok } : null;
+  }).filter(Boolean);
+
+  return { entries, sources, noChanges: !!raw.no_changes };
+}
+
+// Models routinely wrap JSON in ``` fences or add a sentence around it.
+function extractJSON(text) {
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  const body = fenced ? fenced[1] : text;
+  const start = body.indexOf('{'), end = body.lastIndexOf('}');
+  if (start === -1 || end <= start) throw new Error('No JSON object in the model response');
+  return JSON.parse(body.slice(start, end + 1));
+}
+
+const UPDATE_SYSTEM = [
+  'You are updating a reference app for the MMO Aion 2 (NCSOFT).',
+  'You will be given one topic. Report only information that ADDS TO or CORRECTS what the app',
+  'already shows for that topic, based on the current live build of the game.',
+  '',
+  'Reply with a single JSON object and nothing else:',
+  '{"entries":[{"heading":"short title","bullets":["fact","fact"],"confidence":"high|medium|low"}],',
+  ' "sources":[{"title":"page title","url":"https://..."}],',
+  ' "no_changes":false}',
+  '',
+  'Rules:',
+  '- Set "no_changes": true with an empty entries array if you have nothing verifiable to add.',
+  '  That is a perfectly good answer and is much better than padding.',
+  '- Never invent numbers, names, dates or mechanics. Use "confidence":"low" for anything you',
+  '  could not confirm from a source, and omit it entirely if you are guessing.',
+  '- Cite a URL for every claim you can. Uncited claims must be "low" confidence.',
+  '- Korean and Taiwanese sources lead the global build; say which region a change applies to.',
+  '- Plain text only in every string: no markdown, no HTML, no links inside the text.'
+].join('\n');
+
+async function runAIUpdate(topic) {
+  const prompt = [
+    'Topic: ' + topic,
+    '',
+    'What does the current live build of Aion 2 have for this topic that a guide written',
+    'earlier might be missing or have wrong? Reply with the JSON object described above.'
+  ].join('\n');
+  const raw = await runAI(prompt, UPDATE_SYSTEM);
+  const parsed = sanitiseUpdate(extractJSON(raw.text));
+  return {
+    ...parsed,
+    // Prefer the provider's own grounding citations; fall back to what the model listed.
+    sources: raw.sources && raw.sources.length ? raw.sources.slice(0, 10) : parsed.sources,
+    provider: raw.provider, model: raw.model, canSearch: raw.canSearch,
+    fetchedAt: new Date().toISOString()
+  };
+}
+
+ipcMain.handle('content:get', () => readContent());
+
+ipcMain.handle('content:clear', (_e, target) => {
+  const c = readContent();
+  if (typeof target === 'string' && target) delete c[target];
+  writeContent(c);
+  return readContent();
+});
+
+ipcMain.handle('content:clearAll', () => { writeContent({}); return {}; });
+
+ipcMain.handle('ai:update', async (_e, target, topic) => {
+  if (typeof target !== 'string' || !target) return { success: false, error: 'No target given' };
+  if (typeof topic !== 'string' || !topic) return { success: false, error: 'No topic given' };
+  try {
+    const result = await runAIUpdate(topic.slice(0, 500));
+    const c = readContent();
+    if (result.noChanges && !result.entries.length) {
+      c[target] = { entries: [], sources: result.sources, noChanges: true,
+                    provider: result.provider, model: result.model,
+                    canSearch: result.canSearch, fetchedAt: result.fetchedAt };
+    } else {
+      c[target] = { entries: result.entries, sources: result.sources, noChanges: false,
+                    provider: result.provider, model: result.model,
+                    canSearch: result.canSearch, fetchedAt: result.fetchedAt };
+    }
+    writeContent(c);
+    return { success: true, target, entry: c[target] };
+  } catch (e) {
+    return { success: false, error: e.message || String(e) };
+  }
+});
+
+// Is a local Ollama server running? Lets the UI offer a genuinely key-free
+// option without the user having to know the URL.
+ipcMain.handle('ai:detectOllama', () => new Promise(resolve => {
+  const req = http.get({ host: '127.0.0.1', port: 11434, path: '/api/tags', timeout: 1500 }, res => {
+    let d = '';
+    res.setEncoding('utf8');
+    res.on('data', c => { d += c; if (d.length > 200000) req.destroy(); });
+    res.on('end', () => {
+      try {
+        const models = (JSON.parse(d).models || []).map(m => m.name).filter(Boolean).slice(0, 40);
+        resolve({ running: true, models });
+      } catch (e) { resolve({ running: res.statusCode === 200, models: [] }); }
+    });
+  });
+  req.on('timeout', () => { req.destroy(); resolve({ running: false, models: [] }); });
+  req.on('error', () => resolve({ running: false, models: [] }));
+}));
 
 // ---------------------------------------------------------------------------
 // Patch notes feed

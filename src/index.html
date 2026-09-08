@@ -228,6 +228,23 @@
   .ai-stamp{font-size:10.5px;color:var(--faint);margin-top:10px}
   .dgn-ask{background:none;border:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:999px;cursor:pointer;margin-top:10px}
   .dgn-ask:hover{color:var(--gold);border-color:var(--gold)}
+  /* ai-contributed content */
+  .upd-targets{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px;margin:12px 0 4px}
+  .upd-t{display:flex;align-items:center;gap:8px;background:var(--inset);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:11.5px;cursor:pointer}
+  .upd-t input{accent-color:var(--red);cursor:pointer;flex-shrink:0}
+  .upd-t .dot{margin-left:auto;font-size:9px;color:var(--gold);flex-shrink:0}
+  .ai-block{border:1px solid var(--gold);border-radius:12px;padding:14px 16px;margin-top:16px;background:color-mix(in srgb, var(--gold) 7%, transparent)}
+  .ai-block-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+  .ai-tag{background:var(--gold);color:var(--on-accent);font-size:9px;font-weight:800;letter-spacing:.5px;padding:3px 7px;border-radius:999px}
+  .ai-block-meta{font-size:10.5px;color:var(--muted);flex:1}
+  .ai-entry{padding:8px 0;border-bottom:1px dashed var(--line)}
+  .ai-entry:last-of-type{border-bottom:none}
+  .ai-entry h4{font-size:13px;font-weight:700;margin-bottom:4px}
+  .ai-entry ul{margin:0 0 0 16px;font-size:12px;line-height:1.65}
+  .conf{font-size:9px;font-weight:800;letter-spacing:.5px;padding:2px 6px;border-radius:999px;margin-left:6px;vertical-align:middle}
+  .conf-high{background:color-mix(in srgb, var(--green) var(--tint), transparent);color:var(--green);border:1px solid var(--green)}
+  .conf-medium{background:color-mix(in srgb, var(--gold) var(--tint), transparent);color:var(--gold-fg);border:1px solid var(--gold)}
+  .conf-low{background:color-mix(in srgb, var(--red) var(--tint), transparent);color:var(--red-fg);border:1px solid var(--red)}
   /* compact density */
   :root[data-density="compact"] .card,:root[data-density="compact"] .card2{padding:13px 15px}
   :root[data-density="compact"] .grid{gap:12px;margin-top:14px}
@@ -299,6 +316,12 @@
         <select id="setAiProvider" style="width:230px"></select>
       </div>
       <div class="note" id="setAiNote" style="margin-top:2px"></div>
+      <div class="note" id="setAiSetup" style="margin-top:6px"></div>
+      <div class="ai-actions" style="margin-top:8px">
+        <button class="btn small ghost" id="setGetKey" hidden>Get a free API key</button>
+        <button class="btn small ghost" id="setDetectOllama" hidden>Detect local Ollama</button>
+        <span class="ai-meta" id="setDetectOut"></span>
+      </div>
       <div class="field"><label>API key <span id="setKeyState" style="font-size:10.5px"></span></label>
         <input id="setAiKey" type="password" style="width:230px" placeholder="Paste your key" autocomplete="off">
       </div>
@@ -373,6 +396,7 @@
       </div>
       <div class="mults" id="mults"></div>
       <div id="bars"></div>
+      <div class="note" id="barsScale" style="margin-top:8px"></div>
       <div class="divider"></div>
       <div id="flats"></div>
       <div class="note">
@@ -408,6 +432,7 @@
   <!-- /tab-damage -->
 
   <div id="tab-cp" class="tabpanel active">
+      <div class="ai-mount" data-target="section:combat-power"></div>
     <div class="callout">
       <b>⚠ Aion2 actually has two different "power" numbers, and neither has a public formula.</b> Your stat-window <b>Combat Power (전투력)</b> is computed server-side by NCsoft, mostly from gear item level/enhancement — and NCsoft has openly re-weighted it more than once (a 2026 patch raised the CP weight of Smite/Accuracy/Critical and lowered Penetration/Spirit's weight, and players reported their CP number dropping overnight as a result). Separately, the Korean community runs <b>아툴 (Atool, aion2tool.com)</b> — a from-scratch DPS-estimate score built from real skill-damage-share data, which parties actually use to judge a player's contribution, because two characters at the same Combat Power can put out very different real damage depending on their <b>Soul Engraving</b> rolls (random substats every piece of gear carries). Nothing below claims to reproduce either number exactly. It compiles what Korean (Inven, FM코리아, DC인사이드, the official AION2-NC boards) and Taiwanese/Chinese (Bilibili, 17173, TapTap) communities agree on for relative stat priority, plus every subsystem below that has fully confirmed, fixed numbers.
     </div>
@@ -568,6 +593,7 @@
   <!-- /tab-cp -->
 
   <div id="tab-arcana" class="tabpanel">
+      <div class="ai-mount" data-target="section:arcana"></div>
     <div class="callout" style="margin-top:0">
       <b>Arcana has expanded to 10 slots on the current KR/TW build.</b> The roster grew in stages: the original 5 (Chalice, Parchment, Compass, Bell, Mirror) → <b>Scales</b> → <b>Key + Hourglass</b> (July 1, 2026 "Chapter 1") → <b>Dice + Lantern</b> (August 12, 2026). The slot count below defaults to 10 to match that live build, but stays adjustable: Aion 2 Global (full launch October 5, 2026) is not guaranteed to ship with all 10 at once, so set it to whatever your client actually shows. Set-effect numbers are the best we could source and several conflicted between guides (likely different patches) — treat them as directional, not exact.
     </div>
@@ -631,6 +657,7 @@
 
     <!-- Classes -->
     <div id="sub-classes" class="subtabpanel">
+      <div class="ai-mount" data-target="section:classes"></div>
       <div class="card">
         <h2>All 9 Classes <span style="color:var(--muted);font-weight:400;font-size:12px">— 8 at launch, Brawler added in Chapter 1</span></h2>
         <table class="attr">
@@ -655,6 +682,7 @@
 
     <!-- Progression -->
     <div id="sub-progression" class="subtabpanel">
+      <div class="ai-mount" data-target="section:progression"></div>
       <div class="card">
         <h2>Two Numbers That Gate Everything <span style="color:var(--muted);font-weight:400;font-size:12px">— Gear Score vs Combat Power</span></h2>
         <div class="tier-row"><div class="tier-badge tier-A">GS</div><div><div class="tier-name">Gear Score / Item Level</div><div class="tier-desc">The <b>gatekeeper</b>. Content checks this to let you in — item level ~1,000 is the threshold for finishing the story and entering the first endgame dungeons. You can be gear-score-eligible and still be too weak.</div></div></div>
@@ -678,6 +706,7 @@
 
     <!-- PvP -->
     <div id="sub-pvp" class="subtabpanel">
+      <div class="ai-mount" data-target="section:pvp"></div>
       <div class="card">
         <h2>PvP Systems</h2>
         <div class="tier-row"><div class="tier-badge tier-S">1</div><div><div class="tier-name">The Abyss — open-world faction warfare</div><div class="tier-desc">Aion's signature PvP space: a three-dimensional zone where Elyos and Asmodians fight over territory, contested world bosses and siege-style objectives on repeatable reward loops. Note the structural change from the original Aion — factions meet in <b>designated areas/modes</b> rather than through the old massive fortress sieges.</div></div></div>
@@ -693,6 +722,7 @@
 
     <!-- Patch History -->
     <div id="sub-patches" class="subtabpanel">
+      <div class="ai-mount" data-target="section:patches"></div>
       <div class="card">
         <h2>Chapter 1 — "Land of Sand and Frost" <span style="color:var(--muted);font-weight:400;font-size:12px">— July 1, 2026</span></h2>
         <div class="tier-row"><div class="tier-badge tier-S">NEW</div><div><div class="tier-name">Brawler class</div><div class="tier-desc">Gauntlet-wielding front-line class built around rapid chain attacks and aggressive engages.</div></div></div>
@@ -730,6 +760,20 @@
         uncited as a lead to confirm rather than an answer.
       </div>
       <div class="card" style="margin-top:14px">
+        <h2>Update the app's guides <span style="color:var(--muted);font-weight:400;font-size:12px">— adds AI findings into each section</span></h2>
+        <div class="note" style="margin-top:0">Pick the areas to check. Anything found is added to that section as a clearly-marked AI block — the app's own sourced guides are never overwritten, and every block can be refreshed or removed on its own.</div>
+        <div id="updTargets" class="upd-targets"></div>
+        <div class="ai-actions">
+          <button class="btn" id="updRun">Check selected for updates</button>
+          <button class="btn small ghost" id="updAll">Select all</button>
+          <button class="btn small ghost" id="updNone">Select none</button>
+          <button class="btn small ghost" id="updClear" style="color:var(--red);border-color:var(--red)">Remove all AI additions</button>
+        </div>
+        <div class="ai-meta" id="updStatus" style="margin-top:10px"></div>
+        <div id="updOff" class="note">Connect a provider in <b>⚙ Settings → AI Assistant</b> to enable this.</div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
         <h2>Ask about Aion 2</h2>
         <div id="aiOff" class="note" style="margin-top:0">
           No AI provider is set up yet. Open <b>⚙ Settings → AI Assistant</b> to connect one —
@@ -750,6 +794,7 @@
     </div>
 
     <div id="sub-glossary" class="subtabpanel">
+      <div class="ai-mount" data-target="section:glossary"></div>
       <div class="card">
         <h2>Korean/Chinese ↔ English Term Glossary</h2>
         <div class="note" style="margin-top:0">Terms below now use the <b>official English localization</b> where it's known (verified against Global-build stat names), with the Korean original alongside. Use this as a lookup when a term elsewhere in the app looks unfamiliar.</div>
@@ -1040,14 +1085,21 @@ function calc(){
     {name:'Damage Amp', val: 0.01/mAmp*100, c:'#5e5e72'},
   ].sort((a,x)=>x.val-a.val);
 
-  const max = Math.max(...list.map(x=>x.val), 0.0001);
+  // Fixed scale, not relative-to-the-leader. Every value here is "% damage
+  // gained per +1 percentage point", and each one works out as (something <= 1)
+  // divided by a multiplier >= 1, so +1.00% is the hard ceiling. Scaling to the
+  // list maximum instead pinned whichever stat ranked first at full width, which
+  // read as a stat being maxed out when it was only first.
+  const BAR_MAX = 1.0;
   $('bars').innerHTML = list.map(x=>{
-    const w = Math.max(x.val/max*100, 2);
+    const w = Math.max(Math.min(x.val / BAR_MAX, 1) * 100, 2);
     const inside = w > 30;
     return `<div class="bar-row"><div class="bar-name">${x.name}${x.tag?'<br><span style="font-size:10px;color:var(--muted)">'+x.tag+'</span>':''}</div>
       <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:${x.c}">${inside?pct(x.val):''}</div>
       ${inside?'':`<span class="bar-val" style="left:${w}%">${pct(x.val)}</span>`}</div></div>`;
   }).join('');
+
+  $('barsScale').textContent = 'Scale: a full bar = +1.00% damage per +1 percentage point (the theoretical maximum, reached only when you have none of that stat yet).';
 
   // Flat attack power conversion
   const flats = [
@@ -1191,6 +1243,9 @@ function applySettings(s){
   const on = !!(s.ai && s.ai.enabled);
   $('aiOff').hidden = on;
   $('aiOn').hidden = !on;
+  $('updOff').hidden = on;
+  $('updRun').disabled = !on;
+  $('updTargets').style.opacity = on ? '1' : '.45';
   renderDgnList();   // the per-dungeon "Ask AI" buttons appear only when it is on
 }
 
@@ -1262,6 +1317,11 @@ function syncProviderUI(){
   $('setAiModel').placeholder = p.defaultModel || 'model name';
   $('setAiKey').disabled = !p.needsKey;
   $('setAiKey').placeholder = p.needsKey ? 'Paste your key' : 'Not needed for a local model';
+  $('setAiSetup').textContent = p.setup ? 'Setup: ' + p.setup : '';
+  $('setGetKey').hidden = !(p.needsKey && p.keyUrl);
+  $('setGetKey').textContent = p.free ? 'Get a free API key' : 'Get an API key';
+  $('setDetectOllama').hidden = p.id !== 'ollama';
+  if (p.id !== 'ollama') $('setDetectOut').textContent = '';
   const sameProvider = s.ai && s.ai.provider === p.id;
   $('setKeyState').textContent = !p.needsKey ? ''
     : (s.apiKeySet && sameProvider ? '— saved (' + s.apiKeyHint + '), leave blank to keep' : '— not set');
@@ -1302,11 +1362,231 @@ $('setAiTest').addEventListener('click', async () => {
   syncProviderUI();
 });
 
+// window.open goes through the main process's window-open handler, which
+// allows only http(s) and hands it to the user's browser.
+$('setGetKey').addEventListener('click', () => {
+  const p = providerById($('setAiProvider').value);
+  if (p && p.keyUrl) window.open(p.keyUrl, '_blank', 'noopener');
+});
+
+$('setDetectOllama').addEventListener('click', async () => {
+  const out = $('setDetectOut');
+  out.textContent = 'Looking for Ollama on this PC…';
+  const r = await window.api.detectOllama();
+  if (!r.running){
+    out.textContent = '✕ Not running. Install it from ollama.com, then run: ollama pull llama3.1';
+    return;
+  }
+  out.textContent = r.models.length
+    ? '✓ Running. Models installed: ' + r.models.slice(0, 6).join(', ')
+    : '✓ Running, but no models yet — run: ollama pull llama3.1';
+  if (r.models.length && !$('setAiModel').value){
+    $('setAiModel').value = r.models[0];
+    await saveSettings({ ai: { ...(SETTINGS.ai||{}), model: r.models[0] } });
+  }
+});
+
 $('setOpenFolder').addEventListener('click', () => window.api.openSettingsFolder());
 $('setClearData').addEventListener('click', () => {
   if (!confirm('Clear everything this app has saved on this computer?\n\nThis wipes your saved stat inputs, Arcana deck, checklist progress, boss timers and calculator rows, then reloads the app. Your AI settings and API key are not affected.')) return;
   try { Object.keys(localStorage).filter(k => k.startsWith(SK)).forEach(k => localStorage.removeItem(k)); } catch(e) {}
   location.reload();
+});
+
+// ---- AI-contributed content -------------------------------------------
+// The app's built-in guides are the base layer and are never touched. Whatever
+// the model contributes lives in a separate store and is painted on top as a
+// marked block, so it can always be told apart, refreshed, or deleted.
+
+let AI_CONTENT = {};
+
+// Every area the AI is allowed to add to. Dungeon targets are generated, so a
+// new instance in DUNGEONS automatically becomes updatable.
+function updateTargets(){
+  return [
+    { id:'section:combat-power', label:'Combat Power priorities',
+      topic:'Combat Power in Aion 2: which stats raise the Combat Power number, and how the current patch weights them' },
+    { id:'section:arcana', label:'Arcana sets & slots',
+      topic:'Aion 2 Arcana: the current slot count, set bonuses, and which cards are worth prioritising' },
+    { id:'section:classes', label:'Classes',
+      topic:'Aion 2 classes: current builds, tier standing and recent balance changes' },
+    { id:'section:progression', label:'Progression',
+      topic:'Aion 2 character progression: gear paths, item level gates and what to prioritise at endgame' },
+    { id:'section:pvp', label:'PvP',
+      topic:'Aion 2 PvP: Abyss and arena systems, current meta and recent PvP balance changes' },
+    { id:'section:patches', label:'Patch history',
+      topic:'Aion 2 recent patches: what the latest updates changed, with dates and regions' },
+    { id:'section:glossary', label:'Glossary terms',
+      topic:'Aion 2 terminology: Korean or Chinese in-game terms and their official English names' },
+  ].concat(DUNGEONS.map(d => ({
+    id: 'dungeon:' + d.id,
+    label: d.name,
+    topic: 'The Aion 2 instance "' + d.name + '" (' + d.kr + '): current boss mechanics and any recent changes'
+  })));
+}
+
+async function loadAIContent(){
+  if (!window.api || !window.api.getContent) return;
+  try { AI_CONTENT = await window.api.getContent() || {}; } catch(e) { AI_CONTENT = {}; }
+  paintAIContent();
+}
+
+function fmtWhen(iso){
+  try { return new Date(iso).toLocaleString('en-US', {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}); }
+  catch(e) { return ''; }
+}
+
+// Built with DOM APIs throughout: every string here came from a model.
+function buildAIBlock(target, data){
+  const box = document.createElement('div');
+  box.className = 'ai-block';
+  box.dataset.target = target;
+
+  const head = document.createElement('div');
+  head.className = 'ai-block-head';
+  const tag = document.createElement('span');
+  tag.className = 'ai-tag';
+  tag.textContent = 'AI ADDED · UNVERIFIED';
+  const meta = document.createElement('span');
+  meta.className = 'ai-block-meta';
+  meta.textContent = [data.provider, data.model, fmtWhen(data.fetchedAt)].filter(Boolean).join(' · ')
+    + (data.canSearch ? '' : ' · no web search, may predate the current patch');
+  const refresh = document.createElement('button');
+  refresh.className = 'btn small ghost'; refresh.dataset.act = 'refresh'; refresh.textContent = 'Refresh';
+  const remove = document.createElement('button');
+  remove.className = 'btn small ghost'; remove.dataset.act = 'remove'; remove.textContent = 'Remove';
+  head.append(tag, meta, refresh, remove);
+  box.appendChild(head);
+
+  if (data.noChanges || !(data.entries || []).length){
+    const p = document.createElement('div');
+    p.className = 'ai-block-meta';
+    p.textContent = 'The model reported nothing to add for this section.';
+    box.appendChild(p);
+  }
+
+  (data.entries || []).forEach(e => {
+    const wrap = document.createElement('div');
+    wrap.className = 'ai-entry';
+    const h = document.createElement('h4');
+    h.textContent = e.heading;
+    const c = document.createElement('span');
+    c.className = 'conf conf-' + (e.confidence || 'low');
+    c.textContent = (e.confidence || 'low').toUpperCase();
+    h.appendChild(c);
+    const ul = document.createElement('ul');
+    (e.bullets || []).forEach(b => { const li = document.createElement('li'); li.textContent = b; ul.appendChild(li); });
+    wrap.append(h, ul);
+    box.appendChild(wrap);
+  });
+
+  if ((data.sources || []).length){
+    const src = document.createElement('div');
+    src.className = 'ai-sources';
+    const b = document.createElement('b'); b.textContent = 'Sources:';
+    src.appendChild(b);
+    data.sources.slice(0, 8).forEach(item => {
+      const href = safeHttpUrl(item.url);
+      src.appendChild(document.createElement('br'));
+      if (href){
+        const a = document.createElement('a');
+        a.href = href; a.target = '_blank'; a.rel = 'noopener noreferrer';
+        a.textContent = item.title || href;
+        src.appendChild(a);
+      } else src.appendChild(document.createTextNode(item.title || ''));
+    });
+    box.appendChild(src);
+  }
+  return box;
+}
+
+function paintAIContent(){
+  document.querySelectorAll('.ai-mount').forEach(m => {
+    m.textContent = '';
+    const data = AI_CONTENT[m.dataset.target];
+    if (data) m.appendChild(buildAIBlock(m.dataset.target, data));
+  });
+  renderUpdTargets();
+}
+
+// Refresh / remove, wherever a block was painted.
+document.addEventListener('click', async e => {
+  const btn = e.target.closest('.ai-block [data-act]'); if (!btn) return;
+  const box = btn.closest('.ai-block');
+  const target = box.dataset.target;
+  if (btn.dataset.act === 'remove'){
+    AI_CONTENT = await window.api.clearContent(target);
+    paintAIContent();
+    if (target.startsWith('dungeon:')) renderDgnList();
+    return;
+  }
+  const t = updateTargets().find(x => x.id === target);
+  if (!t) return;
+  btn.disabled = true; btn.textContent = 'Refreshing…';
+  const r = await window.api.aiUpdate(t.id, t.topic);
+  if (r.success){
+    AI_CONTENT[t.id] = r.entry;
+    paintAIContent();
+    if (target.startsWith('dungeon:')) renderDgnList();
+  } else {
+    btn.disabled = false; btn.textContent = 'Refresh';
+    alert('Update failed: ' + r.error);
+  }
+});
+
+function renderUpdTargets(){
+  const host = $('updTargets'); if (!host) return;
+  const prev = new Set(Array.from(host.querySelectorAll('input:checked')).map(i => i.value));
+  host.textContent = '';
+  updateTargets().forEach(t => {
+    const lab = document.createElement('label');
+    lab.className = 'upd-t';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox'; cb.value = t.id;
+    cb.checked = prev.has(t.id);
+    const span = document.createElement('span');
+    span.textContent = t.label;
+    lab.append(cb, span);
+    if (AI_CONTENT[t.id]){
+      const dot = document.createElement('span');
+      dot.className = 'dot'; dot.textContent = '● updated';
+      lab.appendChild(dot);
+    }
+    host.appendChild(lab);
+  });
+}
+
+$('updAll').addEventListener('click', () => $('updTargets').querySelectorAll('input').forEach(i => i.checked = true));
+$('updNone').addEventListener('click', () => $('updTargets').querySelectorAll('input').forEach(i => i.checked = false));
+$('updClear').addEventListener('click', async () => {
+  if (!confirm('Remove every AI-added block from the app?\n\nThe app’s own guides are not affected.')) return;
+  AI_CONTENT = await window.api.clearAllContent();
+  paintAIContent();
+  renderDgnList();
+});
+
+let updBusy = false;
+$('updRun').addEventListener('click', async () => {
+  if (updBusy) return;
+  const picked = Array.from($('updTargets').querySelectorAll('input:checked')).map(i => i.value);
+  if (!picked.length){ $('updStatus').textContent = 'Pick at least one area first.'; return; }
+  const all = updateTargets();
+  updBusy = true; $('updRun').disabled = true;
+  let done = 0, added = 0, failed = 0;
+  for (const id of picked){
+    const t = all.find(x => x.id === id); if (!t) continue;
+    done++;
+    $('updStatus').textContent = `Checking ${done} of ${picked.length}: ${t.label}…`;
+    const r = await window.api.aiUpdate(t.id, t.topic);
+    if (r.success){ AI_CONTENT[t.id] = r.entry; if ((r.entry.entries||[]).length) added++; }
+    else failed++;
+    paintAIContent();
+  }
+  renderDgnList();
+  updBusy = false; $('updRun').disabled = false;
+  $('updStatus').textContent =
+    `Done. ${added} section${added===1?'':'s'} got new content, ${done-added-failed} had nothing to add` +
+    (failed ? `, ${failed} failed.` : '.') + ' Everything added is unverified — check the sources.';
 });
 
 // ---- AI Lookup ---------------------------------------------------------
@@ -1402,6 +1682,7 @@ $('dgnList').addEventListener('click', e => {
 });
 
 loadSettings();
+loadAIContent();
 
 // ---- Combat Power: Arcana (exact, fixed per-grade values) ----
 // Counted by grade rather than by slot: the per-card Combat Power is confirmed,
@@ -1823,6 +2104,7 @@ function renderDgnList() {
       <div class="dgn-body">
         <div class="mults" style="margin:12px 0 6px">${metaTags}</div>
         ${pts}${diag}
+        <div class="ai-mount" data-target="dungeon:${d.id}"></div>
         <button class="dgn-ask" type="button" data-name="${d.name.replace(/"/g,'&quot;')}"${aiOn ? '' : ' hidden'}>Ask AI what changed for this instance</button>
       </div>
     </div>`;
@@ -1830,6 +2112,11 @@ function renderDgnList() {
 }
 
 function renderDgn() { renderDgnFilters(); renderDgnList(); }
+
+// renderDgnList() rebuilds the cards with innerHTML, so any AI blocks inside
+// them are wiped; repaint after every rebuild.
+const _renderDgnList = renderDgnList;
+renderDgnList = function(){ _renderDgnList(); paintAIContent(); };
 
 $('dgnSearch').addEventListener('input', e => { dgnQuery = e.target.value.trim(); renderDgnList(); });
 $('dgnCollapse').addEventListener('click', () => { dgnOpen.clear(); renderDgnList(); });

@@ -11,4 +11,10 @@ contextBridge.exposeInMainWorld('api', {
 
   aiAsk: (prompt) => ipcRenderer.invoke('ai:ask', prompt),
   aiTest: () => ipcRenderer.invoke('ai:test'),
+  aiUpdate: (target, topic) => ipcRenderer.invoke('ai:update', target, topic),
+  detectOllama: () => ipcRenderer.invoke('ai:detectOllama'),
+
+  getContent: () => ipcRenderer.invoke('content:get'),
+  clearContent: (target) => ipcRenderer.invoke('content:clear', target),
+  clearAllContent: () => ipcRenderer.invoke('content:clearAll'),
 });
