@@ -14,7 +14,7 @@
     --txt:#ededf5; --muted:#9a9ab2; --red:#e63950; --gold:#e0b45c;
   }
   *{margin:0;padding:0;box-sizing:border-box}
-  body{background:var(--bg);font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:var(--txt);min-height:100vh;padding:10px 16px 60px}
+  body{background:var(--bg);font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:var(--txt);min-height:100vh;padding:0 16px 60px}
   .wrap{max-width:1060px;margin:0 auto}
   .grid{display:grid;grid-template-columns:1fr 1.35fr;gap:18px;margin-top:22px}
   @media(max-width:900px){.grid{grid-template-columns:1fr}}
@@ -47,12 +47,17 @@
   .mtag b{color:var(--txt)}
   .warn{color:var(--red);font-size:12px;margin-top:8px;display:none}
   /* tabs */
-  .tabs{display:flex;gap:8px;margin-top:20px;border-bottom:1px solid var(--line)}
+  .tabs{display:flex;gap:8px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50;background:var(--bg);padding:10px 16px 0;margin:0 -16px}
   .tab-btn{background:none;border:none;color:var(--muted);font-family:inherit;font-size:14px;font-weight:700;padding:10px 4px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
   .tab-btn:hover{color:var(--txt)}
   .tab-btn.active{color:var(--gold);border-bottom-color:var(--red)}
   .tab-reset{margin-left:auto;align-self:center;background:none;border:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:11px;font-weight:700;padding:5px 10px;border-radius:999px;cursor:pointer}
   .tab-reset:hover{color:var(--red);border-color:var(--red)}
+  .to-top{position:fixed;right:22px;bottom:22px;z-index:60;width:40px;height:40px;border-radius:50%;
+    background:var(--card2);border:1px solid var(--line);color:var(--gold);font-size:16px;cursor:pointer;
+    display:none;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.45)}
+  .to-top:hover{border-color:var(--gold)}
+  .to-top.show{display:flex}
   .tabpanel{display:none}
   .tabpanel.active{display:block}
   /* combat power tab */
@@ -87,7 +92,7 @@
   table.attr td.num{text-align:right;font-weight:700;color:var(--gold)}
   table.attr input{width:70px;background:#12121c;border:1px solid var(--line);border-radius:6px;color:var(--txt);font-size:12.5px;font-weight:700;padding:5px 8px;text-align:right;font-family:inherit}
   /* other tab: subtabs */
-  .subtabs{display:flex;gap:6px;margin-top:18px;flex-wrap:wrap}
+  .subtabs{display:flex;gap:6px;flex-wrap:wrap;position:sticky;top:var(--tabsH,48px);z-index:40;background:var(--bg);padding:12px 16px;margin:0 -16px;border-bottom:1px solid var(--line)}
   .subtab-btn{background:#15151f;border:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:12.5px;font-weight:700;padding:8px 14px;border-radius:999px;cursor:pointer}
   .subtab-btn:hover{color:var(--txt)}
   .subtab-btn.active{color:#0e0e16;background:var(--gold);border-color:var(--gold)}
@@ -102,7 +107,10 @@
   .dgn-chip{background:#15151f;border:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:11.5px;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer}
   .dgn-chip:hover{color:var(--txt)}
   .dgn-chip.active{background:var(--gold);border-color:var(--gold);color:#0e0e16}
-  .dgn-count{font-size:11px;color:var(--muted);margin-top:9px}
+  .dgn-countrow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:9px}
+  .dgn-count{font-size:11px;color:var(--muted)}
+  .dgn-collapse{background:none;border:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;cursor:pointer}
+  .dgn-collapse:hover{color:var(--gold);border-color:var(--gold)}
   .dgn{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden}
   .dgn-head{display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer;user-select:none}
   .dgn-head:hover{background:#1d1d2b}
@@ -153,7 +161,7 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="tabs" style="margin-top:0" role="tablist">
+  <div class="tabs" role="tablist">
     <button class="tab-btn active" data-tab="cp">Combat Power Breakdown</button>
     <button class="tab-btn" data-tab="damage">Damage Efficiency</button>
     <button class="tab-btn" data-tab="arcana">Arcana Deck Simulator</button>
@@ -161,6 +169,7 @@
     <button class="tab-btn" data-tab="other">Other <span class="beta-badge">BETA</span></button>
     <button id="clearSaved" class="tab-reset" title="Clear every value this app has saved on this computer">Reset saved data</button>
   </div>
+  <button id="toTop" class="to-top" title="Back to top" aria-label="Back to top">↑</button>
 
   <div id="tab-damage" class="tabpanel">
   <div class="grid">
@@ -450,7 +459,10 @@
       <div class="dgn-controls">
         <input type="search" id="dgnSearch" placeholder="Search dungeon, boss or mechanic…  (e.g. &quot;orb&quot;, &quot;Kromede&quot;, &quot;wipe&quot;)" autocomplete="off">
         <div class="dgn-filters" id="dgnFilters"></div>
-        <div class="dgn-count" id="dgnCount"></div>
+        <div class="dgn-countrow">
+          <div class="dgn-count" id="dgnCount"></div>
+          <button class="dgn-collapse" id="dgnCollapse" hidden>Collapse all</button>
+        </div>
       </div>
       <div id="dgnList"></div>
       <div class="note" id="dgnFootnote"></div>
@@ -884,6 +896,24 @@ function calc(){
 calc();
 
 // ---- Tabs ----
+// The sticky sub-tab bars sit directly under the main tab bar, whose height
+// changes when its labels wrap on a narrow window -- keep them in sync.
+const tabsBar = document.querySelector('.tabs');
+function syncTabsHeight(){
+  document.documentElement.style.setProperty('--tabsH', Math.round(tabsBar.getBoundingClientRect().height) + 'px');
+}
+syncTabsHeight();
+if (window.ResizeObserver) new ResizeObserver(syncTabsHeight).observe(tabsBar);
+else window.addEventListener('resize', syncTabsHeight);
+
+// Back to top: switching tabs or scrolling far down both leave you a long way
+// from the navigation, so offer a way back without a long scroll.
+const toTop = $('toTop');
+function syncToTop(){ toTop.classList.toggle('show', window.scrollY > 400); }
+window.addEventListener('scroll', syncToTop, {passive:true});
+toTop.addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
+syncToTop();
+
 function activateTab(name, remember){
   const btn = document.querySelector(`.tab-btn[data-tab="${name}"]`);
   const panel = $('tab-' + name);
@@ -893,7 +923,9 @@ function activateTab(name, remember){
   btn.classList.add('active');
   btn.setAttribute('aria-selected', 'true');
   panel.classList.add('active');
-  if (remember) saveJSON(SK + 'activeTab', name);
+  // Each panel scrolls independently in the user's head -- landing mid-content
+  // because the last tab was scrolled down is disorienting.
+  if (remember){ window.scrollTo(0, 0); syncToTop(); saveJSON(SK + 'activeTab', name); }
   return true;
 }
 const TAB_ORDER = Array.from(document.querySelectorAll('.tab-btn')).map(b => b.dataset.tab);
@@ -1319,8 +1351,11 @@ function renderDgnList() {
     ? `${DUNGEONS.length} instances`
     : `${shown.length} of ${DUNGEONS.length} instances`;
 
+  $('dgnCollapse').hidden = dgnOpen.size === 0;
+
   if (!shown.length) {
-    $('dgnList').innerHTML = `<div class="dgn-empty">No instance matches “${dgnQuery}”.<br><span style="font-size:11.5px">Try a boss name, a mechanic like “orb” or “laser”, or clear the filter.</span></div>`;
+    const esc = dgnQuery.replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+    $('dgnList').innerHTML = `<div class="dgn-empty">No instance matches “${esc}”.<br><span style="font-size:11.5px">Try a boss name, a mechanic like “orb” or “laser”, or clear the filter.</span></div>`;
     return;
   }
 
@@ -1351,6 +1386,7 @@ function renderDgnList() {
 function renderDgn() { renderDgnFilters(); renderDgnList(); }
 
 $('dgnSearch').addEventListener('input', e => { dgnQuery = e.target.value.trim(); renderDgnList(); });
+$('dgnCollapse').addEventListener('click', () => { dgnOpen.clear(); renderDgnList(); });
 $('dgnFilters').addEventListener('click', e => {
   const chip = e.target.closest('.dgn-chip'); if (!chip) return;
   dgnFilter = chip.dataset.cat; renderDgn();
@@ -1374,7 +1410,16 @@ function activateSubtab(scope, name, remember){
   btn.classList.add('active');
   btn.setAttribute('aria-selected', 'true');
   panel.classList.add('active');
-  if (remember) saveJSON(SK + 'sub_' + scope.id, name);
+  if (remember){
+    // Bring the sub-tab bar back to just under the main tabs, so a switch made
+    // deep in a long panel doesn't strand you mid-content in the new one.
+    const bar = scope.querySelector('.subtabs');
+    const barTop = bar.getBoundingClientRect().top + window.scrollY;
+    const tabsH = tabsBar.getBoundingClientRect().height;
+    if (window.scrollY > barTop - tabsH) window.scrollTo(0, Math.max(0, barTop - tabsH));
+    syncToTop();
+    saveJSON(SK + 'sub_' + scope.id, name);
+  }
   return true;
 }
 document.querySelectorAll('.subtab-btn').forEach(btn => {
@@ -1383,6 +1428,8 @@ document.querySelectorAll('.subtab-btn').forEach(btn => {
   btn.addEventListener('click', () => activateSubtab(btn.closest('.tabpanel'), btn.dataset.subtab, true));
 });
 // Restore the sub-tab each section was left on.
+document.querySelectorAll('.tabpanel').forEach(p => p.setAttribute('role', 'tabpanel'));
+document.querySelectorAll('.subtabpanel').forEach(p => p.setAttribute('role', 'tabpanel'));
 document.querySelectorAll('.tabpanel').forEach(scope => {
   const saved = loadJSON(SK + 'sub_' + scope.id, null);
   if (saved) activateSubtab(scope, saved, false);
