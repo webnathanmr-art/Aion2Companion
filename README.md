@@ -28,6 +28,10 @@ damage increase from raising each stat by 1 percentage point, which flat
 attack-power sources are worth the most, and a Manastone/Gear option
 simulator that recomputes your exact total damage change.
 
+Bars use a fixed scale — a full bar is +1.00% damage per +1 percentage
+point, which is the mathematical ceiling for every stat on the chart — so
+bar lengths mean the same thing between builds and across sessions.
+
 ![Damage Efficiency](screenshots/02-damage-efficiency.png)
 
 ### Arcana Deck Simulator
@@ -52,17 +56,65 @@ in the app that has no official English name yet.
 
 ### Other
 Daily/weekly quest checklist with real reset timing, a Field/World Boss and
-Taiwan-server Time Rift event timer, a best-effort Patch Notes fetcher with
-guaranteed fallback links to official sources, and general-purpose
-Enhancement Cost and Crafting Profit calculators.
-
-Everything you type is saved locally between sessions — stat inputs, Arcana
-deck, checklist progress, timers and calculator rows — and "Reset saved
-data" in the tab bar clears it. Ctrl/Cmd+1–5 switch tabs; Ctrl/Cmd+F jumps
-straight to dungeon search.
+Time Rift event timer, a best-effort Patch Notes fetcher with guaranteed
+fallback links to official sources, and general-purpose Enhancement Cost
+and Crafting Profit calculators.
 
 ![Daily/Weekly Checklist](screenshots/05-other-checklist.png)
 ![Boss/Event Timer](screenshots/06-other-bosstimer.png)
+
+### Settings
+Four themes — **Classic** (the original palette, and still the default),
+**Dark** (a more neutral dark), **Light**, and **Match system**. Plus a
+compact density mode, a choice of which tab the app opens on, and a
+configurable time zone and schedule for the Time Rift countdown.
+
+![Settings](screenshots/07-settings.png)
+
+Everything you type is saved locally between sessions — stat inputs, Arcana
+deck, checklist progress, timers and calculator rows — and "Reset saved
+data" clears it. Ctrl/Cmd+1–5 switch tabs; Ctrl/Cmd+F jumps straight to
+dungeon search.
+
+### AI Assistant — optional, bring your own model
+Connect an AI model to research information the app doesn't ship with. It's
+off by default and entirely opt-in.
+
+**Ask about Aion 2** answers one-off questions. **Update the app's guides**
+goes further: pick from 24 areas — the seven guide sections plus every
+instance in the dungeon index — and the model researches each one and adds
+what it finds to that section.
+
+![AI guide updates](screenshots/08-ai-updates.png)
+
+Findings appear as a marked block inside the relevant section, showing the
+provider, model, fetch time, a confidence rating per entry, and the sources
+cited. Each block can be refreshed or removed on its own, and one control
+removes them all.
+
+![An AI block inside the PvP guide](screenshots/09-ai-block.png)
+
+Seven providers, four of them free:
+
+| Provider | Free | Web search | Needs a key |
+|---|---|---|---|
+| Google Gemini | yes | yes (Google Search grounding) | yes |
+| OpenRouter | yes | yes (`:online` models) | yes |
+| Groq | yes | no | yes |
+| Ollama (runs locally) | yes | no | **no** |
+| Anthropic (Claude) | no | yes | yes |
+| OpenAI | no | no | yes |
+| Any OpenAI-compatible endpoint | — | — | optional |
+
+Ollama is the only option needing no account at all — the app can detect a
+local server, list your installed models and fill the field in. The others
+need a free account and key; none of them offer a keyless endpoint, and the
+app links straight to each provider's key page with the exact steps.
+
+Your key is held by the app's main process, encrypted with your operating
+system's secure storage where one is available, and is never exposed to the
+app's own page — the UI only ever sees whether a key is set and a masked
+hint of it. Requests go only to the provider you picked.
 
 ## Honesty by design
 
@@ -73,6 +125,14 @@ present guessed numbers as fact, this app is explicit throughout about
 what's confirmed vs. directional, cites its Korean/Taiwanese community
 sources, and gives you inputs to fill in with your own in-game values where
 no reliable number exists.
+
+The AI features follow the same rule and are deliberately kept as a
+**separate layer**. The app's own researched guides are the base and are
+never modified; AI findings are stored apart, always labelled unverified,
+and always reversible — so you can tell at a glance which is which, and
+undo anything that turns out to be wrong. A model without live web search
+is answering from training data that predates the current patch, and the
+app says so on every block it produces.
 
 ## Run in development
 
