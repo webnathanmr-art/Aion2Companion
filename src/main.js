@@ -20,10 +20,19 @@ function createWindow() {
     }
   });
 
+  // Links open in the user's browser, never in an app window -- but only ever
+  // http(s). Handing an arbitrary scheme (file:, smb:, javascript: ...) to the
+  // OS shell would let anything that got a link into the page run something.
   win.webContents.setWindowOpenHandler(({ url }) => {
-    shell.openExternal(url);
+    try {
+      const { protocol } = new URL(url);
+      if (protocol === 'http:' || protocol === 'https:') shell.openExternal(url);
+    } catch (e) { /* unparseable URL: ignore */ }
     return { action: 'deny' };
   });
+
+  // Nothing in this app should ever navigate the window away from index.html.
+  win.webContents.on('will-navigate', (e) => e.preventDefault());
 
   Menu.setApplicationMenu(null);
   win.loadFile(path.join(__dirname, 'index.html'));
@@ -46,7 +55,7 @@ const FEED_CANDIDATES = [
 
 function fetchOnce(url, redirectsLeft = 3) {
   return new Promise((resolve, reject) => {
-    const req = https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; BoringNonRacistCalculator/1.0)' }, timeout: 7000 }, res => {
+    const req = https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Aion2Companion/1.0)' }, timeout: 7000 }, res => {
       if ([301, 302, 303, 307, 308].includes(res.statusCode) && res.headers.location && redirectsLeft > 0) {
         res.resume();
         const next = new URL(res.headers.location, url).toString();

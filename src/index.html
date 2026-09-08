@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- The app is fully offline and self-contained: no remote script, style,
+     image or font is ever needed. Patch-note feeds are fetched by the main
+     process and only their text is rendered, so the renderer needs no network. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
 <title>Aion 2 Companion</title>
 <style>
   :root{
@@ -47,6 +51,8 @@
   .tab-btn{background:none;border:none;color:var(--muted);font-family:inherit;font-size:14px;font-weight:700;padding:10px 4px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
   .tab-btn:hover{color:var(--txt)}
   .tab-btn.active{color:var(--gold);border-bottom-color:var(--red)}
+  .tab-reset{margin-left:auto;align-self:center;background:none;border:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:11px;font-weight:700;padding:5px 10px;border-radius:999px;cursor:pointer}
+  .tab-reset:hover{color:var(--red);border-color:var(--red)}
   .tabpanel{display:none}
   .tabpanel.active{display:block}
   /* combat power tab */
@@ -61,10 +67,10 @@
   .tier-C{background:#4a4a5c33;color:#8a8aa0;border:1px solid #3a3a4c}
   .tier-name{font-weight:700;font-size:13.5px}
   .tier-desc{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.5}
-  .arc-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:10px}
-  .arc-slot{background:#15151f;border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center}
-  .arc-slot .n{font-size:11px;color:var(--muted);margin-bottom:6px}
-  .arc-slot select{width:100%;background:#12121c;border:1px solid var(--line);border-radius:8px;color:var(--txt);font-size:12px;font-weight:700;padding:6px 4px;font-family:inherit;text-align:center}
+  .arc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+  .arc-slot{background:#15151f;border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center;display:flex;flex-direction:column;justify-content:space-between}
+  .arc-slot .n{font-size:11px;color:var(--muted);margin-bottom:6px;line-height:1.35}
+  .arc-slot select,.arc-slot input{width:100%;background:#12121c;border:1px solid var(--line);border-radius:8px;color:var(--txt);font-size:12px;font-weight:700;padding:6px 4px;font-family:inherit;text-align:center}
   .arcd-row{display:grid;grid-template-columns:1.1fr 1fr 1.3fr;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--line)}
   .arcd-row:last-child{border-bottom:none}
   .arcd-row .arcd-label{font-size:12px;font-weight:700;color:var(--muted)}
@@ -147,12 +153,13 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="tabs" style="margin-top:0">
+  <div class="tabs" style="margin-top:0" role="tablist">
     <button class="tab-btn active" data-tab="cp">Combat Power Breakdown</button>
     <button class="tab-btn" data-tab="damage">Damage Efficiency</button>
     <button class="tab-btn" data-tab="arcana">Arcana Deck Simulator</button>
     <button class="tab-btn" data-tab="guides">Guides</button>
     <button class="tab-btn" data-tab="other">Other <span class="beta-badge">BETA</span></button>
+    <button id="clearSaved" class="tab-reset" title="Clear every value this app has saved on this computer">Reset saved data</button>
   </div>
 
   <div id="tab-damage" class="tabpanel">
@@ -238,7 +245,7 @@
 
     <div class="grid" style="margin-top:14px">
       <div class="card">
-        <h2>Arcana Combat Power <span style="color:var(--muted);font-weight:400;font-size:12px">— quick 5-slot version</span></h2>
+        <h2>Arcana Combat Power <span style="color:var(--muted);font-weight:400;font-size:12px">— quick count by grade</span></h2>
         <div class="arc-grid" id="arcGrid"></div>
         <div class="divider"></div>
         <div class="pockets" style="grid-template-columns:1fr">
@@ -246,7 +253,7 @@
         </div>
         <div class="note">
           ※ Each equipped Arcana card grants a flat Combat Power bonus by grade, independent of its stat roll: Common +20 · Rare +40 · Legendary +60 · Unique +80 — this part is exact and confirmed.<br>
-          ※ This quick version assumes 5 slots, but the Arcana system has expanded at least once (a 6th "Scale" slot was added, and further additions are plausible) — for a slot count you can adjust yourself, plus set-bonus tracking across 7 known sets, use the <b>Arcana Deck Simulator</b> in the Other tab.
+          ※ Enter how many cards of each grade you have equipped; this works at any slot count, which matters because the Arcana roster keeps growing (5 → 6 → 8 → 10 on the current KR/TW build). For per-slot planning and set-bonus tracking across the 7 known sets, use the <b>Arcana Deck Simulator</b> tab.
         </div>
       </div>
 
@@ -726,11 +733,59 @@
 
 <script>
 const $ = id => document.getElementById(id);
+
+// ---- Saved state (localStorage) ----
+// Keys are prefixed a2c_; the older bnrc_ prefix is migrated on first run so
+// existing checklist/boss-timer data survives the rename.
+const SK = 'a2c_';
+function loadJSON(key, fallback){
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+  catch(e) { return fallback; }
+}
+function saveJSON(key, val){
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+}
+(function migrateOldKeys(){
+  try {
+    Object.keys(localStorage).filter(k => k.startsWith('bnrc_')).forEach(k => {
+      const dest = SK + k.slice(5);
+      if (localStorage.getItem(dest) === null) localStorage.setItem(dest, localStorage.getItem(k));
+      localStorage.removeItem(k);
+    });
+  } catch(e) {}
+})();
+
+// Remembers what the user typed into a set of inputs, so the app reopens with
+// their character's numbers instead of a blank form. Values are restored before
+// the first calculation runs.
+function persistFields(key, fieldIds, onChange){
+  const saved = loadJSON(SK + key, {});
+  fieldIds.forEach(id => {
+    const el = $(id); if (!el) return;
+    if (Object.prototype.hasOwnProperty.call(saved, id)) el.value = saved[id];
+    const evt = el.tagName === 'SELECT' ? 'change' : 'input';
+    el.addEventListener(evt, () => {
+      const state = loadJSON(SK + key, {});
+      state[id] = el.value;
+      saveJSON(SK + key, state);
+      if (onChange) onChange();
+    });
+  });
+}
 const ids = ['atk','atkNaked','destr','power','brk','wdmg','amp','pve','boss','cdmg','rear','smite','crate','back','resist','sbuff','sAtk','sW','sAmp','sCrit','sRear','sSmite'];
 ids.forEach(id => $(id).addEventListener('input', calc));
+persistFields('damage', ids);
 
 const fmt = n => n.toLocaleString('en-US', {maximumFractionDigits:0});
 const pct = n => (n>=0?'+':'') + n.toFixed(2) + '%';
+// Only http(s) links are ever rendered from remote feed data — anything else
+// (javascript:, file:, data:, smb: ...) would be handed straight to the OS
+// shell by the main process's window-open handler.
+function safeHttpUrl(raw){
+  if (!raw) return null;
+  try { const u = new URL(raw); return (u.protocol === 'http:' || u.protocol === 'https:') ? u.href : null; }
+  catch(e) { return null; }
+}
 
 function calc(){
   const v = {}; ids.forEach(id => v[id] = parseFloat($(id).value) || 0);
@@ -829,43 +884,79 @@ function calc(){
 calc();
 
 // ---- Tabs ----
+function activateTab(name, remember){
+  const btn = document.querySelector(`.tab-btn[data-tab="${name}"]`);
+  const panel = $('tab-' + name);
+  if (!btn || !panel) return false;
+  document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+  document.querySelectorAll('.tabpanel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  btn.setAttribute('aria-selected', 'true');
+  panel.classList.add('active');
+  if (remember) saveJSON(SK + 'activeTab', name);
+  return true;
+}
+const TAB_ORDER = Array.from(document.querySelectorAll('.tab-btn')).map(b => b.dataset.tab);
 document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tabpanel').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    $('tab-' + btn.dataset.tab).classList.add('active');
-  });
+  btn.setAttribute('role', 'tab');
+  btn.setAttribute('aria-selected', btn.classList.contains('active') ? 'true' : 'false');
+  btn.addEventListener('click', () => activateTab(btn.dataset.tab, true));
+});
+// Reopen on whatever tab you were last using, defaulting to Combat Power.
+activateTab(loadJSON(SK + 'activeTab', 'cp'), false) || activateTab('cp', false);
+
+// Ctrl/Cmd+1..5 jump between main tabs; Ctrl/Cmd+F focuses the dungeon search.
+document.addEventListener('keydown', e => {
+  if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
+  if (e.key >= '1' && e.key <= String(TAB_ORDER.length)){
+    e.preventDefault();
+    activateTab(TAB_ORDER[parseInt(e.key, 10) - 1], true);
+  } else if (e.key === 'f' || e.key === 'F'){
+    e.preventDefault();
+    activateTab('guides', true);
+    activateSubtab($('tab-guides'), 'dungeons');
+    $('dgnSearch').focus();
+    $('dgnSearch').select();
+  }
+});
+
+// ---- Reset every saved value (this app's keys only) ----
+$('clearSaved').addEventListener('click', () => {
+  if (!confirm('Clear everything this app has saved on this computer?\n\nThis wipes your saved stat inputs, Arcana deck, checklist progress, boss timers and calculator rows, then reloads the app.')) return;
+  try { Object.keys(localStorage).filter(k => k.startsWith(SK)).forEach(k => localStorage.removeItem(k)); } catch(e) {}
+  location.reload();
 });
 
 // ---- Combat Power: Arcana (exact, fixed per-grade values) ----
+// Counted by grade rather than by slot: the per-card Combat Power is confirmed,
+// but the number of slots has changed several times, so a fixed slot grid goes
+// stale with every Arcana patch.
 const ARC_GRADES = [
-  {v:0, label:'Empty'},
-  {v:20, label:'Common (+20)'},
-  {v:40, label:'Rare (+40)'},
-  {v:60, label:'Legendary (+60)'},
-  {v:80, label:'Unique (+80)'},
+  {id:'arcCommon',    cp:20, label:'Common'},
+  {id:'arcRare',      cp:40, label:'Rare'},
+  {id:'arcLegendary', cp:60, label:'Legendary'},
+  {id:'arcUnique',    cp:80, label:'Unique'},
 ];
-const arcGrid = $('arcGrid');
-arcGrid.innerHTML = [1,2,3,4,5].map(i => `
+$('arcGrid').innerHTML = ARC_GRADES.map(g => `
   <div class="arc-slot">
-    <div class="n">Slot ${i}</div>
-    <select id="arc${i}">
-      ${ARC_GRADES.map(g => `<option value="${g.v}">${g.label}</option>`).join('')}
-    </select>
+    <div class="n">${g.label} <span style="color:var(--muted);font-weight:400">+${g.cp}</span></div>
+    <input type="number" id="${g.id}" min="0" max="12" step="1" value="0">
   </div>`).join('');
-[1,2,3,4,5].forEach(i => $('arc' + i).addEventListener('change', calcArcana));
 
 function calcArcana(){
-  const vals = [1,2,3,4,5].map(i => parseInt($('arc' + i).value, 10) || 0);
-  const total = vals.reduce((a,b) => a+b, 0);
+  let total = 0, cards = 0;
+  ARC_GRADES.forEach(g => {
+    const n = Math.max(0, parseInt($(g.id).value, 10) || 0);
+    total += n * g.cp;
+    cards += n;
+  });
   $('arcTotal').textContent = fmt(total);
-  const filled = vals.filter(v => v > 0);
-  const allSameGrade = filled.length === 5 && filled.every(v => v === filled[0]);
-  $('arcSetNote').textContent = allSameGrade
-    ? 'All 5 slots same grade — full set bonus should be active in-game'
-    : (filled.length + '/5 slots filled');
+  $('arcSetNote').textContent = cards === 0
+    ? 'No cards entered yet'
+    : cards + (cards === 1 ? ' card equipped' : ' cards equipped');
 }
+ARC_GRADES.forEach(g => $(g.id).addEventListener('input', calcArcana));
+persistFields('arcQuick', ARC_GRADES.map(g => g.id));
 calcArcana();
 
 // ---- Combat Power: Stat Priority Tiers (qualitative, sourced from community guides) ----
@@ -905,6 +996,7 @@ function calcAccuracy(){
   $('cpAccOut').textContent = rate.toFixed(1) + '%';
 }
 $('cpAcc').addEventListener('input', calcAccuracy);
+persistFields('cp', ['cpAcc']);
 calcAccuracy();
 
 // ---- Combat Power: Attribute -> Derived Stat Planner (exact confirmed rates) ----
@@ -920,6 +1012,7 @@ function calcAttrPlanner(){
   });
 }
 ATTR_MAP.forEach(([id]) => $(id).addEventListener('input', calcAttrPlanner));
+persistFields('attrs', ATTR_MAP.map(([id]) => id));
 calcAttrPlanner();
 
 // ---- Guides: Dungeon index (searchable, filterable, collapsible) ----
@@ -1271,24 +1364,29 @@ $('dgnList').addEventListener('click', e => {
 $('dgnFootnote').innerHTML = '※ Entries marked <b>?</b> are ones where the instance is confirmed to exist but no reliable mechanics writeup was reachable — they are listed so the catalogue is complete, not because the guide is finished. Everything else is compiled from Korean/Taiwanese and English community guides.<br>※ Player counts and item-level gates differ between sources (some list expeditions as 1–4, others as 6 or 8 player) — the figures shown are what the sources stated, so treat them as indicative.';
 renderDgn();
 // ---- Sub-tabs (scoped per parent main tab, since Guides and Other each have their own) ----
+function activateSubtab(scope, name, remember){
+  if (!scope) return false;
+  const btn = scope.querySelector(`.subtab-btn[data-subtab="${name}"]`);
+  const panel = scope.querySelector('#sub-' + name);
+  if (!btn || !panel) return false;
+  scope.querySelectorAll('.subtab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+  scope.querySelectorAll('.subtabpanel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  btn.setAttribute('aria-selected', 'true');
+  panel.classList.add('active');
+  if (remember) saveJSON(SK + 'sub_' + scope.id, name);
+  return true;
+}
 document.querySelectorAll('.subtab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const scope = btn.closest('.tabpanel');
-    scope.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
-    scope.querySelectorAll('.subtabpanel').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    scope.querySelector('#sub-' + btn.dataset.subtab).classList.add('active');
-  });
+  btn.setAttribute('role', 'tab');
+  btn.setAttribute('aria-selected', btn.classList.contains('active') ? 'true' : 'false');
+  btn.addEventListener('click', () => activateSubtab(btn.closest('.tabpanel'), btn.dataset.subtab, true));
 });
-
-// ---- Other: local storage helper ----
-function loadJSON(key, fallback){
-  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
-  catch(e) { return fallback; }
-}
-function saveJSON(key, val){
-  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
-}
+// Restore the sub-tab each section was left on.
+document.querySelectorAll('.tabpanel').forEach(scope => {
+  const saved = loadJSON(SK + 'sub_' + scope.id, null);
+  if (saved) activateSubtab(scope, saved, false);
+});
 
 // ---- Other: Daily/Weekly Checklist ----
 const DAILY_TASKS = [
@@ -1324,13 +1422,13 @@ function fmtDateTime(d){
 }
 
 function renderChecklist(kind, tasks, resetHour, periodFn, addDays){
-  const state = loadJSON('bnrc_' + kind, {periodStart:null, checked:{}});
+  const state = loadJSON(SK + kind, {periodStart:null, checked:{}});
   const now = new Date();
   const periodStart = periodFn(resetHour, now);
   if (state.periodStart !== periodStart.toISOString()){
     state.periodStart = periodStart.toISOString();
     state.checked = {};
-    saveJSON('bnrc_' + kind, state);
+    saveJSON(SK + kind, state);
   }
   const nextReset = new Date(periodStart.getTime());
   nextReset.setDate(nextReset.getDate() + addDays);
@@ -1344,9 +1442,9 @@ function renderChecklist(kind, tasks, resetHour, periodFn, addDays){
 
   $(kind + 'Items').querySelectorAll('.chk-item').forEach(row => {
     row.querySelector('input').addEventListener('change', e => {
-      const st = loadJSON('bnrc_' + kind, {periodStart: periodStart.toISOString(), checked:{}});
+      const st = loadJSON(SK + kind, {periodStart: periodStart.toISOString(), checked:{}});
       st.checked[row.dataset.id] = e.target.checked;
-      saveJSON('bnrc_' + kind, st);
+      saveJSON(SK + kind, st);
       row.classList.toggle('done', e.target.checked);
       updateProgress(kind, tasks);
     });
@@ -1354,7 +1452,7 @@ function renderChecklist(kind, tasks, resetHour, periodFn, addDays){
   updateProgress(kind, tasks);
 }
 function updateProgress(kind, tasks){
-  const state = loadJSON('bnrc_' + kind, {checked:{}});
+  const state = loadJSON(SK + kind, {checked:{}});
   const done = tasks.filter(t => state.checked[t.id]).length;
   $(kind + 'Progress').style.width = (done / tasks.length * 100) + '%';
 }
@@ -1364,16 +1462,17 @@ function refreshChecklists(){
   renderChecklist('weekly', WEEKLY_TASKS, dailyHour, getWeeklyPeriodStart, 7);
 }
 $('dailyResetHour').addEventListener('input', refreshChecklists);
+persistFields('resetHour', ['dailyResetHour']);
 refreshChecklists();
 setInterval(refreshChecklists, 60000);
 
 // ---- Other: Field Boss / Event Timer ----
-let bossRows = loadJSON('bnrc_bossRows_tw', [
+let bossRows = loadJSON(SK + 'bossRows_tw', [
   {name:'Legion Commander Ragata (Red Forest / Ragata Fortress)', cooldown:12, lastKilled:null},
   {name:'Eternal Kaltuya (Eternal Island, Elyos)', cooldown:12, lastKilled:null},
   {name:'Undying Kaltuya (Undying Island, Asmodian)', cooldown:12, lastKilled:null},
 ]);
-function saveBossRows(){ saveJSON('bnrc_bossRows_tw', bossRows); }
+function saveBossRows(){ saveJSON(SK + 'bossRows_tw', bossRows); }
 function renderBossRows(){
   $('bossRows').innerHTML = bossRows.map((b, i) => `
     <div class="boss-row" data-i="${i}">
@@ -1485,11 +1584,17 @@ const SLOT_ROLES = [
   {name:'Key & Hourglass', desc:'Added July 1, 2026. Broad <b>stat-based upgrades</b> that suit almost any build — guides advise farming and upgrading <b>Keys before Hourglasses</b> during Transcendence runs.'},
   {name:'Dice & Lantern', desc:'Added August 12, 2026. Purely <b>offensive</b> options — Perfect hits, Critical hits, Multi-Hit and other damage-enhancing rolls.'},
 ];
-let arcDeck = [];
+let arcDeck = loadJSON(SK + 'arcDeck', []);
+if (!Array.isArray(arcDeck)) arcDeck = [];
+arcDeck = arcDeck
+  .filter(s => s && typeof s === 'object')
+  .map(s => ({ grade: parseInt(s.grade, 10) || 0, set: ARCD_SETS.includes(s.set) ? s.set : 'None' }));
+function saveArcDeck(){ saveJSON(SK + 'arcDeck', arcDeck); }
 function ensureArcDeckSize(){
-  const n = Math.max(1, Math.min(12, parseInt($('arcSlotCount').value, 10) || 6));
+  const n = Math.max(1, Math.min(12, parseInt($('arcSlotCount').value, 10) || 10));
   while (arcDeck.length < n) arcDeck.push({grade:0, set:'None'});
   arcDeck.length = n;
+  saveArcDeck();
 }
 function renderArcDeck(){
   ensureArcDeckSize();
@@ -1506,11 +1611,13 @@ function renderArcDeck(){
   calcArcDeck();
 }
 $('arcSlotCount').addEventListener('input', renderArcDeck);
+persistFields('arcSlots', ['arcSlotCount']);
 $('arcDeckRows').addEventListener('change', e => {
   const i = parseInt(e.target.dataset.i, 10);
   const f = e.target.dataset.f;
   if (f === 'grade') arcDeck[i].grade = parseInt(e.target.value, 10);
   if (f === 'set') arcDeck[i].set = e.target.value;
+  saveArcDeck();
   calcArcDeck();
 });
 function calcArcDeck(){
@@ -1571,20 +1678,44 @@ $('checkPatchNotes').addEventListener('click', async () => {
       return;
     }
     status.textContent = 'Loaded ' + items.length + ' item(s) from ' + res.source;
-    results.innerHTML = items.slice(0, 10).map(item => {
-      const title = item.querySelector('title')?.textContent || '(untitled)';
-      let link = item.querySelector('link')?.textContent || item.querySelector('link')?.getAttribute('href') || '#';
-      const date = item.querySelector('pubDate')?.textContent || item.querySelector('updated')?.textContent || '';
-      return `<div class="tier-row"><div class="tier-badge tier-A" style="font-size:9px">NEW</div>
-        <div><div class="tier-name"><a href="${link}" target="_blank" rel="noopener">${title}</a></div><div class="tier-desc">${date}</div></div></div>`;
-    }).join('');
+    // Feed content is remote and untrusted: build these rows with DOM APIs and
+    // textContent (never innerHTML), and only accept http/https hrefs.
+    results.textContent = '';
+    items.slice(0, 10).forEach(item => {
+      const title = item.querySelector('title')?.textContent?.trim() || '(untitled)';
+      const rawLink = item.querySelector('link')?.textContent?.trim()
+        || item.querySelector('link')?.getAttribute('href')?.trim() || '';
+      const date = item.querySelector('pubDate')?.textContent?.trim()
+        || item.querySelector('updated')?.textContent?.trim() || '';
+
+      const row = document.createElement('div'); row.className = 'tier-row';
+      const badge = document.createElement('div');
+      badge.className = 'tier-badge tier-A'; badge.style.fontSize = '9px'; badge.textContent = 'NEW';
+      const body = document.createElement('div');
+      const nameEl = document.createElement('div'); nameEl.className = 'tier-name';
+      const href = safeHttpUrl(rawLink);
+      if (href){
+        const a = document.createElement('a');
+        a.href = href; a.target = '_blank'; a.rel = 'noopener noreferrer';
+        a.textContent = title;
+        nameEl.appendChild(a);
+      } else {
+        nameEl.textContent = title;
+      }
+      const dateEl = document.createElement('div'); dateEl.className = 'tier-desc'; dateEl.textContent = date;
+      body.appendChild(nameEl); body.appendChild(dateEl);
+      row.appendChild(badge); row.appendChild(body);
+      results.appendChild(row);
+    });
   } catch (e) {
     status.textContent = 'Error checking for updates: ' + e.message;
   }
 });
 
 // ---- Other: Enhancement Cost Calculator ----
-let stageRows = [{stage:'', success:0, cost:0}];
+let stageRows = loadJSON(SK + 'stageRows', [{stage:'', success:0, cost:0}]);
+if (!Array.isArray(stageRows) || stageRows.length === 0) stageRows = [{stage:'', success:0, cost:0}];
+function saveStageRows(){ saveJSON(SK + 'stageRows', stageRows); }
 function renderStageRows(){
   $('stageRows').innerHTML = stageRows.map((s, i) => `
     <div class="stage-row" data-i="${i}">
@@ -1602,16 +1733,18 @@ $('stageRows').addEventListener('input', e => {
   if (f === 'stage') stageRows[i].stage = e.target.value;
   if (f === 'success') stageRows[i].success = parseFloat(e.target.value) || 0;
   if (f === 'cost') stageRows[i].cost = parseFloat(e.target.value) || 0;
+  saveStageRows();
   calcEnhancement();
 });
 $('stageRows').addEventListener('click', e => {
   const row = e.target.closest('.stage-row'); if (!row) return;
   if (e.target.dataset.act === 'remove'){
     stageRows.splice(parseInt(row.dataset.i, 10), 1);
+    saveStageRows();
     renderStageRows();
   }
 });
-$('addStageRow').addEventListener('click', () => { stageRows.push({stage:'', success:0, cost:0}); renderStageRows(); });
+$('addStageRow').addEventListener('click', () => { stageRows.push({stage:'', success:0, cost:0}); saveStageRows(); renderStageRows(); });
 function calcEnhancement(){
   let totalAttempts = 0, totalCost = 0;
   stageRows.forEach(s => {
@@ -1628,7 +1761,9 @@ function calcEnhancement(){
 renderStageRows();
 
 // ---- Other: Crafting Profit Calculator ----
-let matRows = [{name:'', qty:1, cost:0}];
+let matRows = loadJSON(SK + 'matRows', [{name:'', qty:1, cost:0}]);
+if (!Array.isArray(matRows) || matRows.length === 0) matRows = [{name:'', qty:1, cost:0}];
+function saveMatRows(){ saveJSON(SK + 'matRows', matRows); }
 function renderMatRows(){
   $('matRows').innerHTML = matRows.map((m, i) => `
     <div class="mat-row" data-i="${i}">
@@ -1646,18 +1781,21 @@ $('matRows').addEventListener('input', e => {
   if (f === 'name') matRows[i].name = e.target.value;
   if (f === 'qty') matRows[i].qty = parseFloat(e.target.value) || 0;
   if (f === 'cost') matRows[i].cost = parseFloat(e.target.value) || 0;
+  saveMatRows();
   calcCraft();
 });
 $('matRows').addEventListener('click', e => {
   const row = e.target.closest('.mat-row'); if (!row) return;
   if (e.target.dataset.act === 'remove'){
     matRows.splice(parseInt(row.dataset.i, 10), 1);
+    saveMatRows();
     renderMatRows();
   }
 });
-$('addMatRow').addEventListener('click', () => { matRows.push({name:'', qty:1, cost:0}); renderMatRows(); });
+$('addMatRow').addEventListener('click', () => { matRows.push({name:'', qty:1, cost:0}); saveMatRows(); renderMatRows(); });
 $('craftSale').addEventListener('input', calcCraft);
 $('craftFee').addEventListener('input', calcCraft);
+persistFields('craft', ['craftSale', 'craftFee']);
 function calcCraft(){
   const matCost = matRows.reduce((sum, m) => sum + m.qty * m.cost, 0);
   const sale = parseFloat($('craftSale').value) || 0;
