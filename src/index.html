@@ -557,7 +557,7 @@
     <div class="grid" style="margin-top:18px">
       <div class="card">
         <h2>Itemization Pipeline <span style="color:var(--muted);font-weight:400;font-size:12px">— 5 systems that build your gear</span></h2>
-        <div class="tier-row"><div class="tier-badge tier-B">1</div><div><div class="tier-name">Base Enhancement (기본강화)</div><div class="tier-desc">Standard gear upgrade currency/materials — the floor everyone does first.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-B">1</div><div><div class="tier-name">Base Enhancement (기본강화)</div><div class="tier-desc">The one Combat Power source with a published rate: <b>+1 Combat Power per enhancement level, rising to +2 per level from +11 onward</b>. Taking every piece to the guaranteed +10 is the standard, no-risk core route. Slot matters for what you get: amulet enhancement raises Penetration and Soul-stone extra damage, belt enhancement raises HP and Defence.</div></div></div>
         <div class="tier-row"><div class="tier-badge tier-B">2</div><div><div class="tier-name">Breakthrough (돌파강화)</div><div class="tier-desc">Each breakthrough on a piece is worth +5% to your Attack Increase Rate (see Damage Efficiency tab) — but it's bound to the gear, so it's lost if that piece is removed/replaced.</div></div></div>
         <div class="tier-row"><div class="tier-badge tier-A">3</div><div><div class="tier-name">Manastone / Spiritstone Engraving (마석·영석 각인)</div><div class="tier-desc">Socketed stat gems — flat Attack Power, Damage Amp %, etc. Casual-friendly baseline: push Weapon/Sub-weapon to +15 breakthrough / 2-star first.</div></div></div>
         <div class="tier-row"><div class="tier-badge tier-C">4</div><div><div class="tier-name">Godstone Engraving (신석각인)</div><div class="tier-desc">On-hit proc effects (stun, seal/silence-lock, paralyze, silence) at varying proc rate/duration by grade — crowd-control utility, not a raw damage stat, and doesn't stack with itself.</div></div></div>
@@ -575,6 +575,32 @@
           <tr><td>Unique (유일)</td><td>4</td><td class="num">+++ (large jump)</td></tr>
         </table>
       </div>
+    </div>
+
+    <div class="grid" style="margin-top:18px">
+      <div class="card">
+        <h2>Devanion &amp; Foundation Content <span style="color:var(--muted);font-weight:400;font-size:12px">— 데바니온 · 내실, the most direct CP there is</span></h2>
+        <div class="note" style="margin-top:0"><b>1 Devanion Point = +1 Combat Power, exactly.</b> Korean guides call this the most straightforward spec-up in the game: it is not a stat roll or a percentage, it is a flat point-for-point conversion, and it costs only time. Community consensus is that clearing the basic foundation content takes a fresh max-level character to roughly <b>1,400 Combat Power</b> before any gear chasing.</div>
+        <div class="tier-row"><div class="tier-badge tier-S">1</div><div><div class="tier-name">Region Quests (지역 퀘스트)</div><div class="tier-desc">Green star markers on the map. Reward Devanion points directly, plus Stigma shards and godstones.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-S">2</div><div><div class="tier-name">Sealed Dungeons (봉인 던전)</div><div class="tier-desc">Found behind the map's <b>?</b> markers. Reward Devanion crystals, titles and belt enhancement scrolls.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-A">3</div><div><div class="tier-name">Garrisons (주둔지)</div><div class="tier-desc">Also behind <b>?</b> markers, same reward family as sealed dungeons.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-A">4</div><div><div class="tier-name">Traces of the Pantheon (주신의 흔적)</div><div class="tier-desc">The feather-hunting collectible line. The fourth of the four foundation systems Korean guides treat as mandatory.</div></div></div>
+        <div class="note">※ If your Combat Power looks low for your gear, this is almost always the gap — foundation content is invisible on your character sheet but converts straight into the number.</div>
+      </div>
+
+      <div class="card2">
+        <h2 class="r">Stigma <span style="color:var(--muted);font-weight:400;font-size:12px">— 스티그마, skill points</span></h2>
+        <div class="note" style="margin-top:0">Aion's Stigma system returns in Aion 2 as a skill-point track rather than a socketed-stone slot. Points come from <b>Stigma Shards</b>, and community guides name shards the <b>first thing to spend Abyss Points on</b> — ahead of any other AP purchase. A fully built-out character is reported to reach <b>18 Greater Stigma</b>.</div>
+        <div class="tier-row"><div class="tier-badge tier-S">AP</div><div><div class="tier-name">Stigma Shards (스티그마 샤드)</div><div class="tier-desc">Bought with Abyss Points. Named the top AP priority in every endgame guide we found — spend here before PvP gear.</div></div></div>
+        <div class="tier-row"><div class="tier-badge tier-A">18</div><div><div class="tier-name">Greater Stigma (상급 스티그마)</div><div class="tier-desc">The reported ceiling on obtainable Greater Stigma. Class boards treat the specific selection as build-defining, so check your own class board rather than a general list.</div></div></div>
+        <div class="note">※ Shards also drop from Region Quests, so foundation content and Stigma progress the same track.</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <h2>Every Known Combat Power Source <span style="color:var(--muted);font-weight:400;font-size:12px">— what we can and cannot confirm</span></h2>
+      <div class="note" style="margin-top:0">A single accounting of everything reported to move the Combat Power number, so nothing gets missed. <b>Exact</b> means a published point-for-point rate. <b>Reported</b> means community consensus that it contributes, without a published rate. <b>Unconfirmed</b> means we could not establish whether it feeds Combat Power at all — listed so the gap is visible rather than hidden.</div>
+      <div id="cpSources" style="margin-top:12px"></div>
     </div>
 
     <div class="refs">
@@ -1715,6 +1741,53 @@ function calcArcana(){
 ARC_GRADES.forEach(g => $(g.id).addEventListener('input', calcArcana));
 persistFields('arcQuick', ARC_GRADES.map(g => g.id));
 calcArcana();
+
+// ---- Combat Power: complete source accounting ----
+// Graded by how well each one is established, so the tab never implies a
+// precision it does not have. "exact" is reserved for published rates.
+const CP_SOURCES = [
+  {n:'Gear Enhancement (기본강화)', g:'exact', v:'+1 CP per level; +2 per level from +11 up',
+   d:'The only source with a published point rate. Every piece to the guaranteed +10 is the standard core route.'},
+  {n:'Devanion Points (데바니온)', g:'exact', v:'+1 CP per point',
+   d:'Flat point-for-point from foundation content — region quests, sealed dungeons, garrisons, Traces of the Pantheon.'},
+  {n:'Arcana Grade', g:'exact', v:'+20 / +40 / +60 / +80 per card',
+   d:'Fixed by grade regardless of the stat roll: Common, Rare, Legendary, Unique. Calculator at the top of this tab.'},
+  {n:'Pantheon / Attribute Points (주신 스탯)', g:'exact', v:'+0.10% or +0.20% per point',
+   d:'Converts into a derived stat at a confirmed per-point rate. Planner further down this tab.'},
+  {n:'Breakthrough (돌파강화)', g:'exact', v:'+5% Attack Increase Rate each',
+   d:'Bound to the individual piece, so it is lost when that piece is replaced.'},
+  {n:'Gear Item Level &amp; Grade', g:'reported', v:'Largest single driver',
+   d:'Combat Power is computed server-side mostly from item level and enhancement. Expedition hero gear is the endgame step.'},
+  {n:'Manastone / Spiritstone Engraving', g:'reported', v:'Varies by stone',
+   d:'Socketed stat gems — flat Attack Power, Damage Amplification and similar substats.'},
+  {n:'Soul Engraving (영혼각인)', g:'reported', v:'Varies — random per piece',
+   d:'A random bonus substat on every piece. The biggest swing in real performance past roughly 2,500 CP, and the reason two characters at equal CP can perform very differently.'},
+  {n:'Titles (칭호)', g:'reported', v:'1–4 stat lines by grade',
+   d:'Four grades across Attack, Defense and Other families. The jump to Unique is reported as unusually large.'},
+  {n:'Stigma (스티그마)', g:'reported', v:'Up to 18 Greater Stigma',
+   d:'Skill points from Stigma Shards, the top-priority Abyss Point purchase.'},
+  {n:'Monoliths', g:'reported', v:'Varies',
+   d:'Account-wide progression track — see the Monoliths card on this tab.'},
+  {n:'Pet Understanding', g:'reported', v:'Varies',
+   d:'Pet stat lines including bonus attack — priority list on this tab.'},
+  {n:'Godstone Engraving (신석각인)', g:'reported', v:'Little to no direct CP',
+   d:'On-hit crowd-control procs. Useful in play, but a utility system rather than a Combat Power source.'},
+  {n:'Collections / Codex', g:'unknown', v:'Not established',
+   d:'Common as a power source in other MMOs. We could not confirm from any reachable source whether Aion 2 has one that feeds Combat Power.'},
+  {n:'Mounts, Wings &amp; Cosmetics', g:'unknown', v:'Not established',
+   d:'Wings are core to Aion, but no source we could reach ties them to the Combat Power figure. Treat as unknown, not as zero.'},
+  {n:'Legion / Guild bonuses', g:'unknown', v:'Not established',
+   d:'No source we could reach states whether legion buffs are counted in your personal Combat Power number.'},
+];
+const CP_GRADE = { exact:{cls:'conf-high', label:'EXACT'}, reported:{cls:'conf-medium', label:'REPORTED'}, unknown:{cls:'conf-low', label:'UNCONFIRMED'} };
+$('cpSources').innerHTML = CP_SOURCES.map(x => `
+  <div class="tier-row">
+    <div style="flex:1">
+      <div class="tier-name">${x.n}<span class="conf ${CP_GRADE[x.g].cls}">${CP_GRADE[x.g].label}</span></div>
+      <div class="tier-desc">${x.d}</div>
+    </div>
+    <div style="flex-shrink:0;width:200px;text-align:right;font-size:11.5px;font-weight:700;color:var(--gold)">${x.v}</div>
+  </div>`).join('');
 
 // ---- Combat Power: Stat Priority Tiers (qualitative, sourced from community guides) ----
 const TIERS = [
